@@ -1,4 +1,4 @@
-daswag-cli
+daSWAG CLI
 ==========
 
 Generate your full Serverless Web Application in seconds with daswag cli
