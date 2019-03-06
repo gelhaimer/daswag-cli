@@ -10,7 +10,7 @@ export default class FileUtils {
    * @param file the file to check.
    * @returns {boolean} whether the file exists and is actually a file.
    */
-  public static doesFileExist(file: string) {
+  public static doesFileExist(file: string): boolean {
     const statObject = FileUtils.getStatObject(file);
     return statObject && statObject.isFile();
   }
@@ -20,7 +20,7 @@ export default class FileUtils {
    * @param directory the directory to check.
    * @returns {boolean} whether the directory exists and is actually a directory.
    */
-  public static doesDirectoryExist(directory: string) {
+  public static doesDirectoryExist(directory: string): boolean {
     const statObject = FileUtils.getStatObject(directory);
     return statObject && statObject.isDirectory();
   }
@@ -41,7 +41,7 @@ export default class FileUtils {
     fse.ensureDirSync(directory);
   }
 
-  public static getStatObject(file: string) {
+  private static getStatObject(file: string) {
     try {
       return fse.statSync(file);
     } catch (error) {

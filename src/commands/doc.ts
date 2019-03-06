@@ -1,5 +1,4 @@
 import {flags} from '@oclif/command';
-import {IConfig} from '@oclif/config';
 
 import opn = require('opn');
 import CommandBase from '../command-base';
@@ -30,7 +29,7 @@ export class Doc extends CommandBase {
     await this.openBrowser(searchUrl);
   }
 
-  private async openBrowser(searchUrl: string) {
+  public async openBrowser(searchUrl: string) {
     return opn(searchUrl, {
       wait: false,
     });

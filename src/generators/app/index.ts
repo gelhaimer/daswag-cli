@@ -1,7 +1,7 @@
-import {AppPrompts} from './app/prompts';
-import {Base} from './base';
+import {Base} from '../base';
+import {AppPrompts} from './prompts';
 
-class App extends Base {
+class Index extends Base {
 
   private opts: {
     baseName?: string,
@@ -31,7 +31,7 @@ class App extends Base {
   public async prompting() {
     this.logger.debug('Prompting phase start');
     // Get App prompts
-    if(!this.isProjectExist(this.opts.provider, this.opts.baseName)) {
+    if (!this.isProjectExist(this.opts.provider, this.opts.baseName)) {
       const prompt = new AppPrompts(this);
       // Ask for base questions like name or provider
       const answersBase = await prompt.askForBasicQuestions();
@@ -40,26 +40,26 @@ class App extends Base {
       this.opts = {
         ...this.opts,
         ...answersBase,
-      }
+      };
     }
   }
 
   public async configuring() {
     this.logger.debug('Configuring phase start');
     // Combine with API generator
-    this.composeWith(require.resolve('./api'), {
+    this.composeWith(require.resolve('../api'), {
       ...this.opts,
       type: 'app'
     });
     // Combine with Client generator
-    this.composeWith(require.resolve('./client'), {
+    this.composeWith(require.resolve('../client'), {
       ...this.opts,
       type: 'app'
     });
   }
 
   public default() {
-    this.logger.debug('Default phase start')
+    this.logger.debug('Default phase start');
     // Save Configuration to yeoman file (.yo-rc.json)
     this.config.set('baseName', this.opts.baseName);
     this.config.set('provider', this.opts.provider);
@@ -67,16 +67,16 @@ class App extends Base {
   }
 
   public writing() {
-    this.logger.debug('Writing phase start')
+    this.logger.debug('Writing phase start');
   }
 
   public install() {
-    this.logger.debug('Installing phase start')
+    this.logger.debug('Installing phase start');
   }
 
   public end() {
-    this.logger.debug('Ending phase start')
+    this.logger.debug('Ending phase start');
   }
 }
 
-export = App
+export = Index

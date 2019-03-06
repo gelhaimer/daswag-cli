@@ -1,10 +1,10 @@
 import chalk from 'chalk';
-import CheckUtils from '../utils/check-utils';
-import {ApiPrompts} from './api/prompts';
-import {Base} from './base';
-import {ClientPrompts} from './client/prompts';
+import CheckUtils from '../../utils/check-utils';
+import {ApiPrompts} from '../api/prompts';
+import {Base} from '../base';
+import {ClientPrompts} from './prompts';
 
-class Client extends Base {
+class Index extends Base {
 
   private opts: {
     baseName?: string,
@@ -136,4 +136,4 @@ class Client extends Base {
   }
 }
 
-export = Client
+export = Index

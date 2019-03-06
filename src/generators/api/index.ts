@@ -1,10 +1,10 @@
 import chalk from 'chalk';
-import CheckUtils from '../utils/check-utils';
-import {ApiPrompts} from './api/prompts';
-import {Base} from './base';
-import {ClientPrompts} from './client/prompts';
+import CheckUtils from '../../utils/check-utils';
+import {Base} from '../base';
+import {ClientPrompts} from '../client/prompts';
+import {ApiPrompts} from './prompts';
 
-class Api extends Base {
+class Index extends Base {
 
   private opts: {
     baseName?: string,
@@ -28,7 +28,7 @@ class Api extends Base {
       baseName: options.baseName || this.config.get('baseName'),
       iac: options.iac || this.config.get('iac'),
       provider: options.provider || this.config.get('provider')
-    }
+    };
   }
 
   public loggerName(): string {
@@ -51,7 +51,7 @@ class Api extends Base {
   public async prompting() {
     this.logger.debug('Prompting phase start');
     // Get Api prompts
-    if(!this.isProjectExist(this.opts.provider, this.opts.baseName)) {
+    if (!this.isProjectExist(this.opts.provider, this.opts.baseName)) {
       const prompt = new ApiPrompts(this);
 
       const answersBase = this.type && this.type === 'app' ? {
@@ -61,25 +61,25 @@ class Api extends Base {
       } : await prompt.askForBasicQuestions();
 
       const answersLanguage = await this.prompt([
-                                             prompt.askForLanguage(answersBase.provider),
-                                             prompt.askForDB(answersBase.provider),
-                                             prompt.askForMonitoring(answersBase.provider),
-                                             prompt.askForTrace(answersBase.provider)
-                                           ]) as any;
-
-      let answerPackageManager = {};
-
-      if (answersLanguage.language === ApiPrompts.LANGUAGE_NODEJS_VALUE) {
-        answerPackageManager =  await this.prompt([
-                                                     prompt.askForPackageManager(answersLanguage.language)
-                                                   ]) as any;
-      }
-
-      const answersApi = await this.prompt([
+                                                  prompt.askForLanguage(answersBase.provider),
                                                   prompt.askForDB(answersBase.provider),
                                                   prompt.askForMonitoring(answersBase.provider),
                                                   prompt.askForTrace(answersBase.provider)
                                                 ]) as any;
+
+      let answerPackageManager = {};
+
+      if (answersLanguage.language === ApiPrompts.LANGUAGE_NODEJS_VALUE) {
+        answerPackageManager = await this.prompt([
+                                                   prompt.askForPackageManager(answersLanguage.language)
+                                                 ]) as any;
+      }
+
+      const answersApi = await this.prompt([
+                                             prompt.askForDB(answersBase.provider),
+                                             prompt.askForMonitoring(answersBase.provider),
+                                             prompt.askForTrace(answersBase.provider)
+                                           ]) as any;
 
       // Combine answers to options
       this.opts = {
@@ -93,7 +93,7 @@ class Api extends Base {
 
   public async configuring() {
     this.logger.debug('Configuring phase start');
-    if(!this.skipChecks) {
+    if (!this.skipChecks) {
       this.log(chalk.blueBright('\nWe are now checking your environment:'));
       // Checking Git
       this.log(`${chalk.blueBright('Checking Git: ')} ${CheckUtils.checkGit() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
@@ -106,20 +106,20 @@ class Api extends Base {
           this.log(`${chalk.blueBright('Checking Serverless framework: ')} ${CheckUtils.checkServerless() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
         }
       }
-      if(this.opts.language === ApiPrompts.LANGUAGE_PYTHON_VALUE) {
+      if (this.opts.language === ApiPrompts.LANGUAGE_PYTHON_VALUE) {
         this.log(`${chalk.blueBright('\nChecking Python & Pip: ')} ${CheckUtils.checkPython() && CheckUtils.checkPip() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
-      } else if(this.opts.language === ApiPrompts.LANGUAGE_NODEJS_VALUE && this.opts.packageManager === ApiPrompts.PACKAGE_MANAGER_NPM_VALUE) {
+      } else if (this.opts.language === ApiPrompts.LANGUAGE_NODEJS_VALUE && this.opts.packageManager === ApiPrompts.PACKAGE_MANAGER_NPM_VALUE) {
         this.log(`${chalk.blueBright('\nChecking NPM: ')} ${CheckUtils.checkNpm() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
-      } else if(this.opts.language === ApiPrompts.LANGUAGE_NODEJS_VALUE && this.opts.packageManager === ApiPrompts.PACKAGE_MANAGER_YARN_VALUE) {
+      } else if (this.opts.language === ApiPrompts.LANGUAGE_NODEJS_VALUE && this.opts.packageManager === ApiPrompts.PACKAGE_MANAGER_YARN_VALUE) {
         this.log(`${chalk.blueBright('\nChecking Yarn: ')} ${CheckUtils.checkYarn() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
       }
     }
   }
 
   public default() {
-    this.logger.debug('Default phase start')
+    this.logger.debug('Default phase start');
     // Save Configuration to yeoman file (.yo-rc.json)
-    if(!this.type || this.type !== 'app') {
+    if (!this.type || this.type !== 'app') {
       this.config.set('baseName', this.opts.baseName);
       this.config.set('provider', this.opts.provider);
       this.config.set('iac', this.opts.iac);
@@ -128,9 +128,8 @@ class Api extends Base {
     this.config.set('monitoring', this.opts.monitoring);
     this.config.set('trace', this.opts.trace);
     this.config.set('db', this.opts.db);
-    this.config.save()
+    this.config.save();
   }
-
 
   public writing() {
     this.logger.debug('Writing phase start');
@@ -141,8 +140,8 @@ class Api extends Base {
     let logMsg = '';
     try {
       // Get executable
-      let executable : string | undefined;
-      switch(this.opts.language) {
+      let executable: string | undefined;
+      switch (this.opts.language) {
         case ApiPrompts.LANGUAGE_NODEJS_VALUE:
           executable = this.opts.packageManager;
           logMsg = `To install your dependencies manually, run: ${chalk.blueBright.bold(`${this.opts.packageManager} install`)}`;
@@ -162,7 +161,7 @@ class Api extends Base {
           break;
 
         default:
-          this.logger.error('Choosen language does not have any referenced executable. You will have to install it manually.')
+          this.logger.error('Choosen language does not have any referenced executable. You will have to install it manually.');
       }
     } catch (e) {
       this.logger.error('Install of dependencies failed!');
@@ -172,9 +171,9 @@ class Api extends Base {
   }
 
   public end() {
-    this.logger.debug('Ending phase start')
+    this.logger.debug('Ending phase start');
     // this.log(chalk.green.bold('\nAPI generated successfully.\n'));
   }
 }
 
-export = Api
+export = Index

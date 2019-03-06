@@ -25,7 +25,6 @@ export default class LoggerUtils {
       ),
       level: defaultLevel,
       transports: [
-        // - Write to all logs with level `info` and above to `combined.log`
         new transports.File({level: 'error', filename: 'error.log'}),
         // - Write all logs error (and above) to Console/terminal
         new transports.Console({

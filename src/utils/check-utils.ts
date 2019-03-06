@@ -6,7 +6,7 @@ export default class CheckUtils {
   public static checkGit() {
     let check = false;
     try {
-      execSync('git --version', {stdio: 'ignore'})
+      execSync('git --verion', {stdio: 'ignore'})
       check = true
     } catch {
       this.logger.debug('Checking Git : KO');
