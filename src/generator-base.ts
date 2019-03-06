@@ -29,7 +29,6 @@ export abstract class GeneratorBase extends CommandBase {
     });
   }
 
-
   private printLogo() {
     this.log('\n');
     this.log(`${chalk.black('██████╗  █████╗ ')}${chalk.blueBright('███████╗██╗    ██╗ █████╗  ██████╗ ')}`);

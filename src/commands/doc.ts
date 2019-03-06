@@ -2,6 +2,7 @@ import {flags} from '@oclif/command';
 
 import opn = require('opn');
 import CommandBase from '../command-base';
+import Utils from '../utils/utils';
 
 export class Doc extends CommandBase {
   public static description = 'Opens the official daSWAG documentation (daswag.tech/documentation) in a browser, and searches for a given keyword.';
@@ -26,12 +27,7 @@ export class Doc extends CommandBase {
     if (options.search) {
       searchUrl = `https://www.google.com/search?q=site%3Adaswag.tech+${args.keyword}`;
     }
-    await this.openBrowser(searchUrl);
+    await Utils.openBrowser(searchUrl);
   }
 
-  public async openBrowser(searchUrl: string) {
-    return opn(searchUrl, {
-      wait: false,
-    });
-  }
 }
