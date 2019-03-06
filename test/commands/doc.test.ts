@@ -1,6 +1,4 @@
-import {expect, test} from '@oclif/test'
-import {mock, verify, when} from 'ts-mockito';
-import opn = require('opn');
+import {expect, test} from '@oclif/test';
 
 describe('doc', () => {
   test
