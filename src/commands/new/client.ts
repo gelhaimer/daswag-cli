@@ -11,18 +11,21 @@ export class Client extends GeneratorBase {
   ];
 
   public static flags = {
-    force: flags.boolean({description: 'overwrite existing files'})
+    force: flags.boolean({description: 'overwrite existing files'}),
+    skipChecks: flags.boolean({description: 'skip tools and dependencies checks'})
   };
 
-  public name = 'new:client';
+  public loggerName() {
+    return 'new:client';
+  }
 
   public async run() {
     const {flags: options, args} = this.parse(Client)
 
-    await super.generate('client', {
+    await super.generate('Client', {
       force: options.force,
       path: args.path,
-      type: 'client'
+      skipChecks: options.skipChecks
     });
   }
 }

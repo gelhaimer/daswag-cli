@@ -1,4 +1,5 @@
 import {flags} from '@oclif/command';
+import {IConfig} from '@oclif/config';
 
 import opn = require('opn');
 import CommandBase from '../command-base';
@@ -12,7 +13,9 @@ export class Doc extends CommandBase {
     search: flags.boolean({char: 's', description: 'Search on Google'}),
   };
 
-  public name = 'doc';
+  public loggerName() {
+    return 'doc';
+  }
 
   public async run() {
     const {flags: options, args} = this.parse(Doc);

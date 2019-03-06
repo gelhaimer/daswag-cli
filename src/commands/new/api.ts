@@ -7,17 +7,22 @@ export class Api extends GeneratorBase {
 
   public static args = [];
 
-  public static flags = {};
+  public static flags = {
+    force: flags.boolean({description: 'overwrite existing files'}),
+    skipChecks: flags.boolean({description: 'skip tools and dependencies checks'})
+  };
 
-  public name = 'new:api';
+  public loggerName() {
+    return 'new:api';
+  }
 
   public async run() {
     const {flags: options, args} = this.parse(Api)
 
-    await super.generate('api', {
+    await super.generate('Api', {
       force: options.force,
       path: args.path,
-      type: 'api'
+      skipChecks: options.skipChecks
     });
   }
 }

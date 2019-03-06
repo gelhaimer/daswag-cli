@@ -1,0 +1,139 @@
+import chalk from 'chalk';
+import CheckUtils from '../utils/check-utils';
+import {ApiPrompts} from './api/prompts';
+import {Base} from './base';
+import {ClientPrompts} from './client/prompts';
+
+class Client extends Base {
+
+  private opts: {
+    baseName?: string,
+    provider?: string,
+    iac?: string,
+    framework?: string,
+    useSass?: boolean,
+    packageManager?: string
+  };
+
+  private readonly type: string;
+  private readonly skipChecks: boolean;
+
+  constructor(args: string | string[], options: any) {
+    super(args, options);
+    this.type = options.type;
+    this.skipChecks = options.skipChecks;
+    this.opts = {
+      baseName: options.baseName || this.config.get('baseName'),
+      iac: options.iac || this.config.get('iac'),
+      provider: options.provider || this.config.get('provider'),
+    }
+  }
+
+  public loggerName(): string {
+    return "generator:client";
+  }
+
+  public async initializing() {
+    this.logger.debug('Initializing phase start');
+    // Load from configuration file
+    this.opts.baseName = this.config.get('baseName');
+    this.opts.provider = this.config.get('provider');
+    this.opts.iac = this.config.get('iac');
+    this.opts.framework = this.config.get('framework');
+    this.opts.useSass = this.config.get('useSass');
+    this.opts.packageManager = this.config.get('packageManager');
+  }
+
+  public async prompting() {
+    this.logger.debug('Prompting phase start');
+    // Get App prompts
+    if(!this.isProjectExist(this.opts.provider, this.opts.baseName)) {
+      const prompt = new ClientPrompts(this);
+      const answersBase = this.type && this.type === 'app' ? {
+        baseName: this.opts.baseName,
+        iac: this.opts.iac,
+        provider: this.opts.provider,
+      } : await prompt.askForBasicQuestions();
+
+      const answersClient = await this.prompt([
+                                                prompt.askForFramework(),
+                                                prompt.askForPackageManager(),
+                                                prompt.askForPreprocessor()
+                                              ]) as any;
+      // Combine answers
+      this.opts = {
+        ...answersBase,
+        ...answersClient
+      };
+    }
+  }
+
+  public async configuring() {
+    this.logger.debug('Configuring phase start');
+    if(!this.skipChecks) {
+      this.log(chalk.blueBright('\nWe are now checking your environment:'));
+      // Checking Git
+      this.log(`${chalk.blueBright('Checking Git: ')} ${CheckUtils.checkGit() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
+      if ((!this.type || this.type !== 'app')) {
+        if (this.opts.iac === ClientPrompts.IAC_CLOUDFORMATION_VALUE) {
+          this.log(`${chalk.blueBright('Checking AWS SAM: ')} ${CheckUtils.checkAWS() && CheckUtils.checkSAM() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
+        } else if (this.opts.iac === ClientPrompts.IAC_TERRAFORM_VALUE) {
+          this.log(`${chalk.blueBright('Checking Terraform: ')} ${CheckUtils.checkTerraform() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
+        } else if (this.opts.iac === ClientPrompts.IAC_SERVERLESS_VALUE) {
+          this.log(`${chalk.blueBright('Checking Serverless framework: ')} ${CheckUtils.checkServerless() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
+        }
+      }
+      if (this.opts.packageManager === ClientPrompts.PACKAGE_MANAGER_NPM_VALUE) {
+        this.log(`${chalk.blueBright('\nChecking NPM: ')} ${CheckUtils.checkNpm() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
+      } else if (this.opts.packageManager === ClientPrompts.PACKAGE_MANAGER_YARN_VALUE) {
+        this.log(`${chalk.blueBright('\nChecking Yarn: ')} ${CheckUtils.checkYarn() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
+      }
+    }
+  }
+
+  public default() {
+    this.logger.debug('Default phase start')
+    // Save Configuration to yeoman file (.yo-rc.json)
+    if(!this.type || this.type !== 'app') {
+      this.config.set('baseName', this.opts.baseName);
+      this.config.set('provider', this.opts.provider);
+      this.config.set('iac', this.opts.iac);
+    }
+    this.config.set('framework', this.opts.framework);
+    this.config.set('useSass', this.opts.useSass);
+    this.config.save();
+  }
+
+  public writing() {
+    this.logger.debug('Writing phase start')
+  }
+
+  public install() {
+    this.logger.debug('Installing phase start')
+    const logMsg = `To install your dependencies manually, run: ${chalk.blueBright.bold(`${this.opts.packageManager} install`)}`;
+
+    try {
+      // Configure install configuration
+      const installConfig = {
+        bower: false,
+        npm: this.opts.packageManager !== ClientPrompts.PACKAGE_MANAGER_YARN_VALUE,
+        yarn: this.opts.packageManager === ClientPrompts.PACKAGE_MANAGER_YARN_VALUE
+      };
+      // Launch install depending on configuration
+      this.installDependencies(installConfig);
+    } catch (e) {
+      this.logger.error('Install of dependencies failed!');
+      this.logger.error(e);
+      this.log(logMsg);
+    }
+  }
+
+  public end() {
+    this.logger.debug('Ending phase start')
+    // this.log(chalk.green.bold('\nClient application generated successfully.\n'));
+    const logMsg = `Start your server with:\n ${chalk.blueBright.bold(`${this.opts.packageManager} start`)}\n`;
+    this.log(chalk.green(logMsg));
+  }
+}
+
+export = Client
