@@ -35,21 +35,22 @@ class App extends Base {
 
   public async initializing() {
     this.logger.debug('Initializing phase start');
-    this.opts.baseName = this.config.get('baseName');
-    this.opts.provider = this.config.get('provider');
-    this.opts.iac = this.config.get('iac');
-    this.opts.auth = this.config.get('auth');
+    if(this.isProjectExist()) {
+      this.opts.baseName = this.config.get('baseName');
+      this.opts.provider = this.config.get('provider');
+      this.opts.iac = this.config.get('iac');
+      this.opts.auth = this.config.get('auth');
+    }
   }
 
   public async prompting() {
     this.logger.debug('Prompting phase start');
-    this.logger.info(JSON.stringify(this.opts));
     // Get App prompts
     const prompt = new AppPrompts(this);
     const answerBaseName = await prompt.askForBaseName(this.opts.baseName) as any;
     const answerProvider = await prompt.askForCloudProviders(this.opts.provider) as any;
-    const answerIac = await prompt.askForInfraAsCode(this.opts.iac, answerProvider.provider);
-    const answerAuth = await prompt.askForAuthentication(this.opts.auth, answerProvider.provider);
+    const answerIac = await prompt.askForInfraAsCode(this.opts.iac, answerProvider.provider) as any;
+    const answerAuth = await prompt.askForAuthentication(this.opts.auth, answerProvider.provider) as any;
 
     // Combine answers and current values
     this.opts = {
