@@ -63,7 +63,6 @@ class Api extends Base {
 
   public async prompting() {
     this.logger.debug('Prompting phase start');
-    this.logger.info(JSON.stringify(this.opts));
     // Get Api prompts
     const prompt = new ApiPrompts(this);
 
@@ -94,7 +93,6 @@ class Api extends Base {
       ...answerMonitoring,
       ...answserTrace,
     };
-    this.logger.info(JSON.stringify(this.opts));
   }
 
   public async configuring() {

@@ -43,27 +43,27 @@ class Client extends Base {
   public async initializing() {
     this.logger.debug('Initializing phase start');
     // Load from configuration file
-    this.opts.baseName = this.config.get('baseName');
-    this.opts.provider = this.config.get('provider');
-    this.opts.iac = this.config.get('iac');
-    this.opts.auth = this.config.get('auth');
-    this.opts.framework = this.config.get('framework');
-    this.opts.useSass = this.config.get('useSass');
-    this.opts.packageManager = this.config.get('packageManager');
+    if (this.isProjectExist()) {
+      this.opts.baseName = this.config.get('baseName');
+      this.opts.provider = this.config.get('provider');
+      this.opts.iac = this.config.get('iac');
+      this.opts.auth = this.config.get('auth');
+      this.opts.framework = this.config.get('framework');
+      this.opts.useSass = this.config.get('useSass');
+      this.opts.packageManager = this.config.get('packageManager');
+    }
   }
 
   public async prompting() {
     this.logger.debug('Prompting phase start');
-    this.logger.info(JSON.stringify(this.opts));
     // Get App prompts
     const prompt = new ClientPrompts(this);
-
     const answerBaseName = await prompt.askForBaseName(this.opts.baseName) as any;
     const answerProvider = await prompt.askForCloudProviders(this.opts.provider) as any;
     const answerIac = await prompt.askForInfraAsCode(this.opts.iac, answerProvider.provider) as any;
     const answerAuth = await prompt.askForAuthentication(this.opts.auth, answerProvider.provider) as any;
 
-    const answerFramework = await prompt.askForFramework(this.opts.auth) as any;
+    const answerFramework = await prompt.askForFramework(this.opts.framework) as any;
     const answerUseSass = await prompt.askForPreprocessor(this.opts.useSass) as any;
     const answerPackageManager = await prompt.askForPackageManager(this.opts.packageManager) as any;
 
@@ -77,7 +77,6 @@ class Client extends Base {
       ...answerUseSass,
       ...answerPackageManager,
     };
-    this.logger.info(JSON.stringify(this.opts));
   }
 
   public async configuring() {
