@@ -63,42 +63,38 @@ class Api extends Base {
 
   public async prompting() {
     this.logger.debug('Prompting phase start');
+    this.logger.info(JSON.stringify(this.opts));
     // Get Api prompts
-    if (!this.isProjectExist()) {
-      const prompt = new ApiPrompts(this);
+    const prompt = new ApiPrompts(this);
 
-      // Get default options when APP generator otherwise prompt questions
-      const answersBase = this.type && this.type === App.GENERATOR_TYPE ? this.opts : await prompt.askForBasicQuestions();
+    // Get default options when APP generator otherwise prompt questions
+    const answerBaseName = await prompt.askForBaseName(this.opts.baseName) as any;
+    const answerProvider = await prompt.askForCloudProviders(this.opts.provider) as any;
+    const answerIac = await prompt.askForInfraAsCode(this.opts.iac, answerProvider.provider);
+    const answerAuth = await prompt.askForAuthentication(this.opts.auth, answerProvider.provider);
 
-      // Prompt language question
-      const answersLanguage = await this.prompt([
-                                                  prompt.askForLanguage(answersBase.provider),
-                                                ]) as any;
+    // Prompt language question
+    const answersLanguage = await prompt.askForLanguage(this.opts.language, answerProvider.provider);
+    const answerPackageManager = await prompt.askForPackageManager(this.opts.packageManager, answersLanguage.language);
 
-      let answerPackageManager = {};
+    // Prompt other questions
+    const answerDb = await prompt.askForDB(this.opts.db, answerProvider.provider);
+    const answerMonitoring = await prompt.askForMonitoring(this.opts.monitoring, answerProvider.provider);
+    const answserTrace = await prompt.askForTrace(this.opts.trace, answerProvider.provider);
 
-      // Prompt PackageManager question if needed (NodeJS case)
-      if (answersLanguage.language === ApiPrompts.LANGUAGE_NODEJS_VALUE) {
-        answerPackageManager = await this.prompt([
-                                                   prompt.askForPackageManager(answersLanguage.language)
-                                                 ]) as any;
-      }
-
-      // Prompt other questions
-      const answersApi = await this.prompt([
-                                             prompt.askForDB(answersBase.provider),
-                                             prompt.askForMonitoring(answersBase.provider),
-                                             prompt.askForTrace(answersBase.provider)
-                                           ]) as any;
-
-      // Combine answers to options
-      this.opts = {
-        ...answersBase,
-        ...answersLanguage,
-        ...answerPackageManager,
-        ...answersApi,
-      };
-    }
+    // Combine answers to options
+    this.opts = {
+      ...answerProvider,
+      ...answerBaseName,
+      ...answerIac,
+      ...answerAuth,
+      ...answersLanguage,
+      ...answerPackageManager,
+      ...answerDb,
+      ...answerMonitoring,
+      ...answserTrace,
+    };
+    this.logger.info(JSON.stringify(this.opts));
   }
 
   public async configuring() {

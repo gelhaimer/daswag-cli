@@ -43,18 +43,23 @@ class App extends Base {
 
   public async prompting() {
     this.logger.debug('Prompting phase start');
+    this.logger.info(JSON.stringify(this.opts));
     // Get App prompts
-    if (!this.isProjectExist()) {
-      const prompt = new AppPrompts(this);
-      // Ask for base questions like name or provider
-      const answersBase = await prompt.askForBasicQuestions();
+    const prompt = new AppPrompts(this);
+    const answerBaseName = await prompt.askForBaseName(this.opts.baseName) as any;
+    const answerProvider = await prompt.askForCloudProviders(this.opts.provider) as any;
+    const answerIac = await prompt.askForInfraAsCode(this.opts.iac, answerProvider.provider);
+    const answerAuth = await prompt.askForAuthentication(this.opts.auth, answerProvider.provider);
 
-      // Combine answers and current values
-      this.opts = {
-        ...this.opts,
-        ...answersBase,
-      };
-    }
+    // Combine answers and current values
+    this.opts = {
+      ...answerBaseName,
+      ...answerProvider,
+      ...answerIac,
+      ...answerAuth,
+    };
+    this.logger.info(JSON.stringify(this.opts));
+
   }
 
   public async configuring() {

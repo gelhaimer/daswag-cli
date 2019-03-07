@@ -1,4 +1,3 @@
-import {flags} from '@oclif/command';
 import * as inquirer from 'inquirer';
 
 import {GeneratorBase} from '../../generator-base';
@@ -38,7 +37,10 @@ export class New extends GeneratorBase {
 
     // Prompt question to choose which type of project user want to generate
     const responses: any = await inquirer.prompt([{
-      choices: [{name: 'API only', value:Api.GENERATOR_TYPE}, {name: 'Client only', value:Client.GENERATOR_TYPE}, {name: 'Both (API + Client)', value:App.GENERATOR_TYPE}],
+      choices: [{name: 'API only', value: Api.GENERATOR_TYPE}, {
+        name: 'Client only',
+        value: Client.GENERATOR_TYPE
+      }, {name: 'Both (API + Client)', value: App.GENERATOR_TYPE}],
       message: 'What do you want to create',
       name: 'type',
       type: 'list'

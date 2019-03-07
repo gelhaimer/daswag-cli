@@ -1,5 +1,3 @@
-import {flags} from '@oclif/command';
-
 import {GeneratorBase} from '../../generator-base';
 
 export class Api extends GeneratorBase {

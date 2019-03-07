@@ -14,9 +14,9 @@ export abstract class Prompt {
   constructor(public generator: Base) {
   }
 
-  public askForBaseName() {
+  public async askForBaseName(configValue: string | undefined) {
     const defaultBaseName = this.generator.getDefaultBaseName();
-    return {
+    return configValue === undefined ? this.generator.prompt([{
       default: defaultBaseName,
       message: 'What is the base name of your application?',
       name: 'baseName',
@@ -30,21 +30,21 @@ export abstract class Prompt {
         }
         return true;
       }
-    };
+    }]) : {};
   }
 
-  public askForCloudProviders() {
-    return {
+  public async askForCloudProviders(configValue: string | undefined) {
+    return configValue === undefined ? this.generator.prompt([ {
       choices: [{name: 'Amazone Web Services', value: 'AWS'}],
       default: Prompt.PROVIDER_AWS_VALUE,
       message: 'On which cloud providers do you want to deploy your infrastructure?',
       name: 'provider',
       type: 'list',
-    };
+    }]) : { provider : configValue };
   }
 
-  public askForInfraAsCode(provider: string) {
-    return {
+  public async askForInfraAsCode(configValue: string | undefined, provider: string) {
+    return configValue === undefined ? this.generator.prompt([ {
       choices: [
         {name: 'SAM (Serverless Application Model)', value: Prompt.IAC_SAM_VALUE},
         // {name: 'Terraform', value: Prompt.IAC_TERRAFORM_VALUE},
@@ -54,11 +54,11 @@ export abstract class Prompt {
       message: 'On which cloud providers do you want to deploy your infrastructure?',
       name: 'iac',
       type: 'list',
-    };
+    }]) : { iac : configValue };
   }
 
-  public askForAuthentication(provider: string) {
-    return {
+  public async askForAuthentication(configValue: string | undefined, provider: string) {
+    return configValue === undefined ? this.generator.prompt([ {
       choices: [
         {name: 'Auth0', value: Prompt.AUTH_AUTH0_VALUE},
         // {name: 'Cognito', value:Prompt.AUTH_COGNITO_VALUE},
@@ -68,24 +68,6 @@ export abstract class Prompt {
       message: `Which ${chalk.yellow('*Authentication*')} would you like to use?`,
       name: 'auth',
       type: 'list',
-    };
-  }
-
-  public async askForBasicQuestions() {
-    // Ask for base questions like name or provider
-    const answersBase = await this.generator.prompt([
-                                                      this.askForBaseName(),
-                                                      this.askForCloudProviders()
-                                                    ]) as any;
-
-    // Build IaC question based on provider value
-    const answersIac = await this.generator.prompt([
-                                                     this.askForInfraAsCode(answersBase.provider),
-                                                     this.askForAuthentication(answersBase.provider)
-                                                   ]) as any;
-    return {
-      ...answersBase,
-      ...answersIac
-    };
+    }]) : { auth : configValue };
   }
 }

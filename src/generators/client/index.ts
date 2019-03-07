@@ -54,24 +54,30 @@ class Client extends Base {
 
   public async prompting() {
     this.logger.debug('Prompting phase start');
+    this.logger.info(JSON.stringify(this.opts));
     // Get App prompts
-    if (!this.isProjectExist()) {
-      const prompt = new ClientPrompts(this);
+    const prompt = new ClientPrompts(this);
 
-      // Get answer from options if APP generator otherwise prompt questions
-      const answersBase = this.type && this.type === App.GENERATOR_TYPE ? this.opts : await prompt.askForBasicQuestions();
+    const answerBaseName = await prompt.askForBaseName(this.opts.baseName) as any;
+    const answerProvider = await prompt.askForCloudProviders(this.opts.provider) as any;
+    const answerIac = await prompt.askForInfraAsCode(this.opts.iac, answerProvider.provider) as any;
+    const answerAuth = await prompt.askForAuthentication(this.opts.auth, answerProvider.provider) as any;
 
-      const answersClient = await this.prompt([
-                                                prompt.askForFramework(),
-                                                prompt.askForPackageManager(),
-                                                prompt.askForPreprocessor()
-                                              ]) as any;
-      // Combine answers
-      this.opts = {
-        ...answersBase,
-        ...answersClient
-      };
-    }
+    const answerFramework = await prompt.askForFramework(this.opts.auth) as any;
+    const answerUseSass = await prompt.askForPreprocessor(this.opts.useSass) as any;
+    const answerPackageManager = await prompt.askForPackageManager(this.opts.packageManager) as any;
+
+    // Combine answers
+    this.opts = {
+      ...answerBaseName,
+      ...answerProvider,
+      ...answerIac,
+      ...answerAuth,
+      ...answerFramework,
+      ...answerUseSass,
+      ...answerPackageManager,
+    };
+    this.logger.info(JSON.stringify(this.opts));
   }
 
   public async configuring() {
