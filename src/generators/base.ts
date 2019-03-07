@@ -20,8 +20,8 @@ export abstract class Base extends Generator {
    * @param provider Name of the Cloud provider
    * @param baseName Name of the project
    */
-  public isProjectExist(provider: string | undefined, baseName: string | undefined): boolean {
-    return provider !== undefined && baseName !== undefined;
+  public isProjectExist(): boolean {
+    return this.config.get('provider') !== undefined && this.config.get('baseName') !== undefined;
   }
 
 }

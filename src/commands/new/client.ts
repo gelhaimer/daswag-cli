@@ -1,5 +1,4 @@
 import {flags} from '@oclif/command';
-import * as inquirer from 'inquirer';
 
 import {GeneratorBase} from '../../generator-base';
 
@@ -11,8 +10,15 @@ export class Client extends GeneratorBase {
   ];
 
   public static flags = {
-    force: flags.boolean({description: 'overwrite existing files'}),
-    skipChecks: flags.boolean({description: 'skip tools and dependencies checks'})
+    auth: Client.FLAG_AUTH,
+    baseName: Client.FLAG_BASE_NAME,
+    force: Client.FLAG_FORCE,
+    framework: Client.FLAG_FRAMEWORK,
+    iac: Client.FLAG_IAC,
+    packageManager: Client.FLAG_PACKAGE_MANAGER,
+    provider: Client.FLAG_PROVIDER,
+    skipChecks: Client.FLAG_SKIP_CHECKS,
+    useSass: Client.FLAG_USE_SASS,
   };
 
   public loggerName() {
@@ -20,12 +26,23 @@ export class Client extends GeneratorBase {
   }
 
   public async run() {
-    const {flags: options, args} = this.parse(Client)
+    const {flags: options, args} = this.parse(Client);
 
+    // Validate all flags values
+    this.validate(options);
+
+    // Then launch the dedicated generator
     await super.generate('Client', {
+      auth: options.auth,
+      baseName: options.baseName,
       force: options.force,
+      framework: options.framework,
+      iac: options.iac,
+      packageManager: options.packageManager,
       path: args.path,
-      skipChecks: options.skipChecks
+      provider: options.provider,
+      skipChecks: options.skipChecks,
+      useSass: options.useSass,
     });
   }
 }

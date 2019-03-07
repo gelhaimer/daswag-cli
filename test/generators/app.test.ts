@@ -12,7 +12,7 @@ describe('daswag:app', () => {
         .withOptions({})
         .withPrompts({
           baseName: 'daSWAG',
-          iac: Prompt.IAC_CLOUDFORMATION_VALUE,
+          iac: Prompt.IAC_SAM_VALUE,
           provider: Prompt.PROVIDER_AWS_VALUE
         })
         .withGenerators([dummyApi, dummyClient])

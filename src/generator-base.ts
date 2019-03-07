@@ -1,3 +1,4 @@
+import * as flags from '@oclif/command/lib/flags';
 import {createEnv} from 'yeoman-environment';
 import CommandBase from './command-base';
 
@@ -5,9 +6,29 @@ import chalk from "chalk";
 import pjson = require('pjson');
 
 export abstract class GeneratorBase extends CommandBase {
+
+  public static FLAG_USE_SASS = flags.boolean({description: 'enable stylesheet preprocessor'});
+  public static FLAG_AUTH = flags.string({description: 'Authentication used to secure your client and API (auth0)'});
+  public static FLAG_BASE_NAME = flags.string({description: 'Base name of your project'});
+  public static FLAG_DB = flags.string({description: 'Database used to store your objects (dynamodb)'});
+  public static FLAG_FORCE = flags.boolean({description: 'overwrite existing files'});
+  public static FLAG_FRAMEWORK = flags.string({description: 'cloud provider used to deploy your project (aws)'});
+  public static FLAG_IAC = flags.string({description: 'infra as code dependency (sam)'});
+  public static FLAG_LANGUAGE = flags.string({description: 'Language used to develop your API (python)'});
+  public static FLAG_MONITORING = flags.string({description: 'Monitoring solution for your API (cloudwatch)'});
+  public static FLAG_PACKAGE_MANAGER = flags.string({description: 'Package manager used to build your project (npm|yarn)'});
+  public static FLAG_PROVIDER = flags.string({description: 'cloud provider used to deploy your project (aws)'});
+  public static FLAG_SKIP_CHECKS = flags.boolean({description: 'skip tools and dependencies checks'});
+  public static FLAG_TRACE = flags.string({description: 'Trace solution for your API (xray)'});
+
+
   protected init(): Promise<any> {
     this.printLogo();
     return super.init();
+  }
+
+  protected validate(options: object): boolean {
+    return true;
   }
 
   protected async generate(type: string, generatorOptions: object = {}) {

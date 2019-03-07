@@ -1,18 +1,21 @@
 import chalk from 'chalk';
 import CheckUtils from '../../utils/check-utils';
-import {ApiPrompts} from '../api/prompts';
+import App = require('../app');
 import {Base} from '../base';
 import {ClientPrompts} from './prompts';
 
-class Index extends Base {
+class Client extends Base {
+
+  public static GENERATOR_TYPE = 'client';
 
   private opts: {
+    auth?: string,
     baseName?: string,
-    provider?: string,
-    iac?: string,
     framework?: string,
-    useSass?: boolean,
+    iac?: string,
+    provider?: string,
     packageManager?: string
+    useSass?: boolean,
   };
 
   private readonly type: string;
@@ -20,13 +23,17 @@ class Index extends Base {
 
   constructor(args: string | string[], options: any) {
     super(args, options);
-    this.type = options.type;
+    this.type = options.type || Client.GENERATOR_TYPE;
     this.skipChecks = options.skipChecks;
     this.opts = {
-      baseName: options.baseName || this.config.get('baseName'),
-      iac: options.iac || this.config.get('iac'),
-      provider: options.provider || this.config.get('provider'),
-    }
+      auth: options.auth,
+      baseName: options.baseName,
+      framework: options.framework,
+      iac: options.iac,
+      packageManager:options.packageManager,
+      provider: options.provider,
+      useSass: options.useSass
+    };
   }
 
   public loggerName(): string {
@@ -39,6 +46,7 @@ class Index extends Base {
     this.opts.baseName = this.config.get('baseName');
     this.opts.provider = this.config.get('provider');
     this.opts.iac = this.config.get('iac');
+    this.opts.auth = this.config.get('auth');
     this.opts.framework = this.config.get('framework');
     this.opts.useSass = this.config.get('useSass');
     this.opts.packageManager = this.config.get('packageManager');
@@ -47,13 +55,11 @@ class Index extends Base {
   public async prompting() {
     this.logger.debug('Prompting phase start');
     // Get App prompts
-    if(!this.isProjectExist(this.opts.provider, this.opts.baseName)) {
+    if (!this.isProjectExist()) {
       const prompt = new ClientPrompts(this);
-      const answersBase = this.type && this.type === 'app' ? {
-        baseName: this.opts.baseName,
-        iac: this.opts.iac,
-        provider: this.opts.provider,
-      } : await prompt.askForBasicQuestions();
+
+      // Get answer from options if APP generator otherwise prompt questions
+      const answersBase = this.type && this.type === App.GENERATOR_TYPE ? this.opts : await prompt.askForBasicQuestions();
 
       const answersClient = await this.prompt([
                                                 prompt.askForFramework(),
@@ -70,12 +76,12 @@ class Index extends Base {
 
   public async configuring() {
     this.logger.debug('Configuring phase start');
-    if(!this.skipChecks) {
+    if (!this.skipChecks) {
       this.log(chalk.blueBright('\nWe are now checking your environment:'));
       // Checking Git
       this.log(`${chalk.blueBright('Checking Git: ')} ${CheckUtils.checkGit() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
-      if ((!this.type || this.type !== 'app')) {
-        if (this.opts.iac === ClientPrompts.IAC_CLOUDFORMATION_VALUE) {
+      if ((!this.type || this.type !== App.GENERATOR_TYPE)) {
+        if (this.opts.iac === ClientPrompts.IAC_SAM_VALUE) {
           this.log(`${chalk.blueBright('Checking AWS SAM: ')} ${CheckUtils.checkAWS() && CheckUtils.checkSAM() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
         } else if (this.opts.iac === ClientPrompts.IAC_TERRAFORM_VALUE) {
           this.log(`${chalk.blueBright('Checking Terraform: ')} ${CheckUtils.checkTerraform() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
@@ -92,12 +98,14 @@ class Index extends Base {
   }
 
   public default() {
-    this.logger.debug('Default phase start')
+    this.logger.debug('Default phase start');
     // Save Configuration to yeoman file (.yo-rc.json)
-    if(!this.type || this.type !== 'app') {
+    if (!this.type || this.type !== App.GENERATOR_TYPE) {
+      this.config.set('type', this.type);
       this.config.set('baseName', this.opts.baseName);
       this.config.set('provider', this.opts.provider);
       this.config.set('iac', this.opts.iac);
+      this.config.set('auth', this.opts.auth);
     }
     this.config.set('framework', this.opts.framework);
     this.config.set('useSass', this.opts.useSass);
@@ -105,11 +113,11 @@ class Index extends Base {
   }
 
   public writing() {
-    this.logger.debug('Writing phase start')
+    this.logger.debug('Writing phase start');
   }
 
   public install() {
-    this.logger.debug('Installing phase start')
+    this.logger.debug('Installing phase start');
     const logMsg = `To install your dependencies manually, run: ${chalk.blueBright.bold(`${this.opts.packageManager} install`)}`;
 
     try {
@@ -129,11 +137,11 @@ class Index extends Base {
   }
 
   public end() {
-    this.logger.debug('Ending phase start')
+    this.logger.debug('Ending phase start');
     // this.log(chalk.green.bold('\nClient application generated successfully.\n'));
     const logMsg = `Start your server with:\n ${chalk.blueBright.bold(`${this.opts.packageManager} start`)}\n`;
     this.log(chalk.green(logMsg));
   }
 }
 
-export = Index
+export = Client

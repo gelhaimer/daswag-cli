@@ -1,19 +1,23 @@
 import chalk from 'chalk';
 import CheckUtils from '../../utils/check-utils';
+import App = require('../app');
 import {Base} from '../base';
 import {ClientPrompts} from '../client/prompts';
 import {ApiPrompts} from './prompts';
 
-class Index extends Base {
+class Api extends Base {
+
+  public static GENERATOR_TYPE = 'api';
 
   private opts: {
+    auth?: string,
     baseName?: string,
-    provider?: string,
+    db?: string,
     iac?: string,
     language?: string,
-    packageManager?: string,
-    db?: string,
     monitoring?: string,
+    packageManager?: string,
+    provider?: string,
     trace?: string
   };
 
@@ -22,12 +26,18 @@ class Index extends Base {
 
   constructor(args: string | string[], options: any) {
     super(args, options);
-    this.type = options.type;
+    this.type = options.type || Api.GENERATOR_TYPE;
     this.skipChecks = options.skipChecks;
     this.opts = {
-      baseName: options.baseName || this.config.get('baseName'),
-      iac: options.iac || this.config.get('iac'),
-      provider: options.provider || this.config.get('provider')
+      auth: options.auth,
+      baseName: options.baseName,
+      db: options.db,
+      iac: options.iac,
+      language: options.language,
+      monitoring: options.monitoring,
+      packageManager: options.packageManager,
+      provider: options.provider,
+      trace: options.trace,
     };
   }
 
@@ -37,44 +47,44 @@ class Index extends Base {
 
   public async initializing() {
     this.logger.debug('Initializing phase start');
-    // Load from configuration file
-    this.opts.baseName = this.config.get('baseName');
-    this.opts.provider = this.config.get('provider');
-    this.opts.iac = this.config.get('iac');
-    this.opts.language = this.config.get('language');
-    this.opts.monitoring = this.config.get('monitoring');
-    this.opts.trace = this.config.get('trace');
-    this.opts.db = this.config.get('db');
-    this.opts.packageManager = this.config.get('packageManager');
+    // Override parameters from configuration file
+    // Only if project exist
+    if (this.isProjectExist()) {
+      this.opts.baseName = this.config.get('baseName');
+      this.opts.provider = this.config.get('provider');
+      this.opts.iac = this.config.get('iac');
+      this.opts.language = this.config.get('language');
+      this.opts.monitoring = this.config.get('monitoring');
+      this.opts.trace = this.config.get('trace');
+      this.opts.db = this.config.get('db');
+      this.opts.packageManager = this.config.get('packageManager');
+    }
   }
 
   public async prompting() {
     this.logger.debug('Prompting phase start');
     // Get Api prompts
-    if (!this.isProjectExist(this.opts.provider, this.opts.baseName)) {
+    if (!this.isProjectExist()) {
       const prompt = new ApiPrompts(this);
 
-      const answersBase = this.type && this.type === 'app' ? {
-        baseName: this.opts.baseName,
-        iac: this.opts.iac,
-        provider: this.opts.provider,
-      } : await prompt.askForBasicQuestions();
+      // Get default options when APP generator otherwise prompt questions
+      const answersBase = this.type && this.type === App.GENERATOR_TYPE ? this.opts : await prompt.askForBasicQuestions();
 
+      // Prompt language question
       const answersLanguage = await this.prompt([
                                                   prompt.askForLanguage(answersBase.provider),
-                                                  prompt.askForDB(answersBase.provider),
-                                                  prompt.askForMonitoring(answersBase.provider),
-                                                  prompt.askForTrace(answersBase.provider)
                                                 ]) as any;
 
       let answerPackageManager = {};
 
+      // Prompt PackageManager question if needed (NodeJS case)
       if (answersLanguage.language === ApiPrompts.LANGUAGE_NODEJS_VALUE) {
         answerPackageManager = await this.prompt([
                                                    prompt.askForPackageManager(answersLanguage.language)
                                                  ]) as any;
       }
 
+      // Prompt other questions
       const answersApi = await this.prompt([
                                              prompt.askForDB(answersBase.provider),
                                              prompt.askForMonitoring(answersBase.provider),
@@ -95,10 +105,11 @@ class Index extends Base {
     this.logger.debug('Configuring phase start');
     if (!this.skipChecks) {
       this.log(chalk.blueBright('\nWe are now checking your environment:'));
-      // Checking Git
+
+      // Checking all needed dependencies to be able to launch projet
       this.log(`${chalk.blueBright('Checking Git: ')} ${CheckUtils.checkGit() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
-      if ((!this.type || this.type !== 'app')) {
-        if (this.opts.iac === ClientPrompts.IAC_CLOUDFORMATION_VALUE) {
+      if ((!this.type || this.type !== App.GENERATOR_TYPE)) {
+        if (this.opts.iac === ClientPrompts.IAC_SAM_VALUE) {
           this.log(`${chalk.blueBright('Checking AWS SAM: ')} ${CheckUtils.checkAWS() && CheckUtils.checkSAM() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
         } else if (this.opts.iac === ClientPrompts.IAC_TERRAFORM_VALUE) {
           this.log(`${chalk.blueBright('Checking Terraform: ')} ${CheckUtils.checkTerraform() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
@@ -107,11 +118,11 @@ class Index extends Base {
         }
       }
       if (this.opts.language === ApiPrompts.LANGUAGE_PYTHON_VALUE) {
-        this.log(`${chalk.blueBright('\nChecking Python & Pip: ')} ${CheckUtils.checkPython() && CheckUtils.checkPip() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
+        this.log(`${chalk.blueBright('Checking Python & Pip: ')} ${CheckUtils.checkPython() && CheckUtils.checkPip() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
       } else if (this.opts.language === ApiPrompts.LANGUAGE_NODEJS_VALUE && this.opts.packageManager === ApiPrompts.PACKAGE_MANAGER_NPM_VALUE) {
-        this.log(`${chalk.blueBright('\nChecking NPM: ')} ${CheckUtils.checkNpm() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
+        this.log(`${chalk.blueBright('Checking NPM: ')} ${CheckUtils.checkNpm() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
       } else if (this.opts.language === ApiPrompts.LANGUAGE_NODEJS_VALUE && this.opts.packageManager === ApiPrompts.PACKAGE_MANAGER_YARN_VALUE) {
-        this.log(`${chalk.blueBright('\nChecking Yarn: ')} ${CheckUtils.checkYarn() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
+        this.log(`${chalk.blueBright('Checking Yarn: ')} ${CheckUtils.checkYarn() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
       }
     }
   }
@@ -119,11 +130,13 @@ class Index extends Base {
   public default() {
     this.logger.debug('Default phase start');
     // Save Configuration to yeoman file (.yo-rc.json)
-    if (!this.type || this.type !== 'app') {
+    if (!this.type || this.type !== App.GENERATOR_TYPE) {
       this.config.set('baseName', this.opts.baseName);
       this.config.set('provider', this.opts.provider);
       this.config.set('iac', this.opts.iac);
+      this.config.set('auth', this.opts.auth);
     }
+    this.config.set('packageManager', this.opts.packageManager);
     this.config.set('language', this.opts.language);
     this.config.set('monitoring', this.opts.monitoring);
     this.config.set('trace', this.opts.trace);
@@ -176,4 +189,4 @@ class Index extends Base {
   }
 }
 
-export = Index
+export = Api

@@ -51,6 +51,7 @@
     "@types/read-pkg": "^3.0.0",
     "@types/shelljs": "^0.8.3",
     "@types/sinon": "^7.0.9",
+    "@types/yeoman-assert": "^3.1.1",
     "@types/yeoman-generator": "^3.1.0",
     "@types/yeoman-test": "^2.0.1",
     "@types/yosay": "^0.0.29",
@@ -71,6 +72,7 @@
     "tslint": "^5.12.1",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.3.3",
+    "yeoman-assert": "^3.1.1",
     "yeoman-test": "^1.9.1"
   },
   "engines": {
