@@ -1,9 +1,9 @@
 import chalk from 'chalk';
 import CheckUtils from '../../utils/check-utils';
 import App = require('../app');
-import {Base} from '../base';
-import {ClientPrompts} from '../client/prompts';
-import {ApiPrompts} from './prompts';
+import {Base} from '../core/base';
+import {ClientPrompts} from '../client/client-prompts';
+import {ApiPrompts} from './api-prompts';
 
 class Api extends Base {
 
@@ -23,11 +23,13 @@ class Api extends Base {
 
   private readonly type: string;
   private readonly skipChecks: boolean;
+  private readonly skipGit: boolean;
 
   constructor(args: string | string[], options: any) {
     super(args, options);
     this.type = options.type || Api.GENERATOR_TYPE;
     this.skipChecks = options.skipChecks;
+    this.skipGit = options.skipGit;
     this.opts = {
       auth: options.auth,
       baseName: options.baseName,
@@ -39,6 +41,8 @@ class Api extends Base {
       provider: options.provider,
       trace: options.trace,
     };
+    // Register transform
+    this.registerPrettierTransform();
   }
 
   public loggerName(): string {
@@ -48,17 +52,14 @@ class Api extends Base {
   public async initializing() {
     this.logger.debug('Initializing phase start');
     // Override parameters from configuration file
-    // Only if project exist
-    if (this.isProjectExist()) {
-      this.opts.baseName = this.config.get('baseName');
-      this.opts.provider = this.config.get('provider');
-      this.opts.iac = this.config.get('iac');
-      this.opts.language = this.config.get('language');
-      this.opts.monitoring = this.config.get('monitoring');
-      this.opts.trace = this.config.get('trace');
-      this.opts.db = this.config.get('db');
-      this.opts.packageManager = this.config.get('packageManager');
-    }
+    this.opts.baseName = this.config.get('baseName');
+    this.opts.provider = this.config.get('provider');
+    this.opts.iac = this.config.get('iac');
+    this.opts.language = this.config.get('language');
+    this.opts.monitoring = this.config.get('monitoring');
+    this.opts.trace = this.config.get('trace');
+    this.opts.db = this.config.get('db');
+    this.opts.packageManager = this.config.get('packageManager');
   }
 
   public async prompting() {
@@ -124,12 +125,10 @@ class Api extends Base {
   public default() {
     this.logger.debug('Default phase start');
     // Save Configuration to yeoman file (.yo-rc.json)
-    if (!this.type || this.type !== App.GENERATOR_TYPE) {
-      this.config.set('baseName', this.opts.baseName);
-      this.config.set('provider', this.opts.provider);
-      this.config.set('iac', this.opts.iac);
-      this.config.set('auth', this.opts.auth);
-    }
+    this.config.set('baseName', this.opts.baseName);
+    this.config.set('provider', this.opts.provider);
+    this.config.set('iac', this.opts.iac);
+    this.config.set('auth', this.opts.auth);
     this.config.set('packageManager', this.opts.packageManager);
     this.config.set('language', this.opts.language);
     this.config.set('monitoring', this.opts.monitoring);

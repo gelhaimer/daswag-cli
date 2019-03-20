@@ -1,26 +1,23 @@
-import {Base} from '../base';
-import {AppPrompts} from './prompts';
+import {Base} from '../core/base';
+import {IOptions} from "../core/options.model";
+import {AppPrompts} from './app-prompts';
 
 class App extends Base {
 
   public static GENERATOR_TYPE = 'app';
 
-  private opts: {
-    auth?: string,
-    baseName?: string,
-    iac?: string,
-    provider?: string,
-  };
-
+  private opts: IOptions;
   private readonly path: string;
   private readonly type: string;
   private readonly skipChecks: boolean;
+  private readonly skipGit: boolean;
 
   constructor(args: string | string[], options: any) {
     super(args, options);
     this.path = options.path;
     this.type = App.GENERATOR_TYPE;
     this.skipChecks = options.skipChecks;
+    this.skipGit = options.skipGit;
     this.opts = {
       auth: options.auth,
       baseName: options.baseName,
@@ -35,17 +32,15 @@ class App extends Base {
 
   public async initializing() {
     this.logger.debug('Initializing phase start');
-    if(this.isProjectExist()) {
-      this.opts.baseName = this.config.get('baseName');
-      this.opts.provider = this.config.get('provider');
-      this.opts.iac = this.config.get('iac');
-      this.opts.auth = this.config.get('auth');
-    }
+    this.opts.baseName = this.config.get('baseName');
+    this.opts.provider = this.config.get('provider');
+    this.opts.iac = this.config.get('iac');
+    this.opts.auth = this.config.get('auth');
   }
 
   public async prompting() {
     this.logger.debug('Prompting phase start');
-    // Get App prompts
+    // Get default prompts
     const prompt = new AppPrompts(this);
     const answerBaseName = await prompt.askForBaseName(this.opts.baseName) as any;
     const answerProvider = await prompt.askForCloudProviders(this.opts.provider) as any;
@@ -69,12 +64,14 @@ class App extends Base {
     this.composeWith(require.resolve('../api'), {
       ...this.opts,
       skipChecks: this.skipChecks,
+      skipGit: this.skipGit,
       type: this.type,
     });
     // Combine with Client generator
     this.composeWith(require.resolve('../client'), {
       ...this.opts,
       skipChecks: this.skipChecks,
+      skipGit: this.skipGit,
       type: this.type,
     });
   }

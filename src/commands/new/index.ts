@@ -24,6 +24,7 @@ export class New extends GeneratorBase {
     packageManager: New.FLAG_PACKAGE_MANAGER,
     provider: New.FLAG_PROVIDER,
     skipChecks: New.FLAG_SKIP_CHECKS,
+    skipGit: New.FLAG_SKIP_GIT,
     trace: New.FLAG_TRACE,
     useSass: New.FLAG_USE_SASS,
   };
@@ -63,6 +64,7 @@ export class New extends GeneratorBase {
       path: args.path,
       provider: options.provider,
       skipChecks: options.skipChecks,
+      skipGit: options.skipGit,
       trace: options.trace,
       useSass: options.useSass,
     });

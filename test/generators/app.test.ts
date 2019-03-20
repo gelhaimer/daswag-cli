@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as helpers from 'yeoman-test';
-import {Prompt} from '../../src/generators/prompt';
+import {Prompt} from '../../src/generators/core/prompt';
 
 describe('daswag:app', () => {
   context('generate project with a client and an API', () => {

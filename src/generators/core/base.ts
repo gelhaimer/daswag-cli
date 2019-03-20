@@ -1,6 +1,6 @@
 import * as Path from 'path';
 import * as Generator from 'yeoman-generator';
-import LoggerUtils from '../utils/logger-utils';
+import LoggerUtils from '../../utils/logger-utils';
 
 import * as filter from 'gulp-filter';
 import * as prettier from 'prettier';
@@ -29,18 +29,9 @@ export abstract class Base extends Generator {
   }
 
   /**
-   * Is the current project already generated or not
-   * @param provider Name of the Cloud provider
-   * @param baseName Name of the project
-   */
-  public isProjectExist(): boolean {
-    return this.config.get('provider') !== undefined && this.config.get('baseName') !== undefined;
-  }
-
-  /**
    * Register beautify as transform stream for beautifying files during generation
    */
-  public registerBeautifyTransform() {
+  public registerPrettierTransform() {
     // Prettier is clever, it uses correct rules and correct parser according to file extension.
     const prettierFilter = filter(['{,**/}*.{md,json,ts,tsx,scss,css,yml}'], { restore: true });
     // this pipe will pass through (restore) anything that doesn't match typescriptFilter

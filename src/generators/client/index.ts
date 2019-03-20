@@ -1,30 +1,25 @@
 import chalk from 'chalk';
 import CheckUtils from '../../utils/check-utils';
 import App = require('../app');
-import {Base} from '../base';
-import {ClientPrompts} from './prompts';
+import {Base} from '../core/base';
+import {ClientFiles} from "./client-files";
+import {IClientOptions} from "./client-options.model";
+import {ClientPrompts} from './client-prompts';
 
 class Client extends Base {
 
   public static GENERATOR_TYPE = 'client';
 
-  private opts: {
-    auth?: string,
-    baseName?: string,
-    framework?: string,
-    iac?: string,
-    provider?: string,
-    packageManager?: string
-    useSass?: boolean,
-  };
-
+  private opts: IClientOptions;
   private readonly type: string;
   private readonly skipChecks: boolean;
+  private readonly skipGit: boolean;
 
   constructor(args: string | string[], options: any) {
     super(args, options);
     this.type = options.type || Client.GENERATOR_TYPE;
     this.skipChecks = options.skipChecks;
+    this.skipGit = options.skipGit;
     this.opts = {
       auth: options.auth,
       baseName: options.baseName,
@@ -34,6 +29,9 @@ class Client extends Base {
       provider: options.provider,
       useSass: options.useSass
     };
+
+    // Register transform
+    // this.registerPrettierTransform();
   }
 
   public loggerName(): string {
@@ -43,15 +41,13 @@ class Client extends Base {
   public async initializing() {
     this.logger.debug('Initializing phase start');
     // Load from configuration file
-    if (this.isProjectExist()) {
-      this.opts.baseName = this.config.get('baseName');
-      this.opts.provider = this.config.get('provider');
-      this.opts.iac = this.config.get('iac');
-      this.opts.auth = this.config.get('auth');
-      this.opts.framework = this.config.get('framework');
-      this.opts.useSass = this.config.get('useSass');
-      this.opts.packageManager = this.config.get('packageManager');
-    }
+    this.opts.baseName = this.config.get('baseName');
+    this.opts.provider = this.config.get('provider');
+    this.opts.iac = this.config.get('iac');
+    this.opts.auth = this.config.get('auth');
+    this.opts.framework = this.config.get('framework');
+    this.opts.useSass = this.config.get('useSass');
+    this.opts.packageManager = this.config.get('packageManager');
   }
 
   public async prompting() {
@@ -105,20 +101,21 @@ class Client extends Base {
   public default() {
     this.logger.debug('Default phase start');
     // Save Configuration to yeoman file (.yo-rc.json)
-    if (!this.type || this.type !== App.GENERATOR_TYPE) {
-      this.config.set('type', this.type);
-      this.config.set('baseName', this.opts.baseName);
-      this.config.set('provider', this.opts.provider);
-      this.config.set('iac', this.opts.iac);
-      this.config.set('auth', this.opts.auth);
-    }
+    this.config.set('type', this.type);
+    this.config.set('baseName', this.opts.baseName);
+    this.config.set('provider', this.opts.provider);
+    this.config.set('iac', this.opts.iac);
+    this.config.set('auth', this.opts.auth);
     this.config.set('framework', this.opts.framework);
     this.config.set('useSass', this.opts.useSass);
+    this.config.set('packageManager', this.opts.packageManager);
     this.config.save();
   }
 
   public writing() {
     this.logger.debug('Writing phase start');
+    // Copy files
+    new ClientFiles(this, this.opts).writeFiles();
   }
 
   public install() {

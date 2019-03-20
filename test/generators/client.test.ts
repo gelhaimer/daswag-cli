@@ -1,76 +1,88 @@
 import * as path from 'path';
 import * as assert from 'yeoman-assert';
 import * as helpers from 'yeoman-test';
-import {ClientPrompts} from '../../src/generators/client/prompts';
-import {Prompt} from '../../src/generators/prompt';
+import {IClientOptions} from "../../src/generators/client/client-options.model";
+import {ClientPrompts} from '../../src/generators/client/client-prompts';
+import {Prompt} from '../../src/generators/core/prompt';
+import TestUtils from "../utils/test-utils";
+import {Base} from "../../src/generators/core/base";
 
 describe('daswag:client', () => {
   context('generate a client', () => {
-
     describe('with AWS, Angular and SAM parameters', () => {
-      const config = {
-        baseName: 'daSWAG',
+      let generator: Base;
+      const config : IClientOptions = {
+        baseName: 'baseName',
         framework: ClientPrompts.FRAMEWORK_ANGULAR_VALUE,
         iac: Prompt.IAC_SAM_VALUE,
         packageManager: ClientPrompts.PACKAGE_MANAGER_YARN_VALUE,
         provider: Prompt.PROVIDER_AWS_VALUE,
         useSass: true,
       };
-      before(done => {
-        helpers
+      it('creates expected files for given configuration', () => {
+        return helpers
           .run(path.join(__dirname, '../../src/generators/client'))
           .withOptions({})
           .withPrompts(config)
-          .on('end', done);
-      });
-      it('creates expected files for given configuration', () => {
-        assert.file(['.yo-rc.json']);
+          .on('ready', function (gen) {
+            // This is called right before `generator.run()` is called
+            generator = gen;
+          })
+          .then((dir) => {
+            assert.file( path.join(dir, '.yo-rc.json'));
+            assert.jsonFileContent(path.join(dir, '.yo-rc.json'),{ "daswag-cli": config});
+          });
       });
     });
 
     describe('with AWS, Angular and Terraform parameters', () => {
-      const config = {
-        baseName: 'daSWAG',
+      let generator: Base;
+      const config : IClientOptions = {
+        baseName: 'baseName',
         framework: ClientPrompts.FRAMEWORK_ANGULAR_VALUE,
         iac: Prompt.IAC_TERRAFORM_VALUE,
         packageManager: ClientPrompts.PACKAGE_MANAGER_YARN_VALUE,
         provider: Prompt.PROVIDER_AWS_VALUE,
         useSass: true,
       };
-      before(done => {
-        helpers
+      it('creates expected files for given configuration', () => {
+        return helpers
           .run(path.join(__dirname, '../../src/generators/client'))
           .withOptions({})
           .withPrompts(config)
-          .on('end', done);
-      });
-      it('creates expected files for given configuration', () => {
-        assert.file(['.yo-rc.json']);
+          .on('ready', function (gen) {
+            // This is called right before `generator.run()` is called
+            generator = gen;
+          })
+          .then((dir) => {
+            console.log(generator);
+            assert.file( path.join(dir, '.yo-rc.json'));
+            assert.jsonFileContent(path.join(dir, '.yo-rc.json'), { "daswag-cli": config});
+          });
       });
     });
 
     describe('with AWS, Angular and Serverless parameters', () => {
-      const config = {
-        baseName: 'daSWAG',
+      const config : IClientOptions = {
+        baseName: 'baseName',
         framework: ClientPrompts.FRAMEWORK_ANGULAR_VALUE,
         iac: Prompt.IAC_SERVERLESS_VALUE,
         packageManager: ClientPrompts.PACKAGE_MANAGER_YARN_VALUE,
         provider: Prompt.PROVIDER_AWS_VALUE,
         useSass: true,
       };
-      before(done => {
+      it('creates expected files for given configuration', () => {
         helpers
           .run(path.join(__dirname, '../../src/generators/client'))
           .withOptions({})
           .withPrompts(config)
-          .on('end', done);
-      });
-      it('creates expected files for given configuration', () => {
-        assert.file(['.yo-rc.json']);
-      });
-      it('update project configuration', () => {
-        // assert.jsonFileContent('.yo-rc.json', config);
+          .then((dir) => {
+            assert.file( '.yo-rc.json');
+            assert.jsonFileContent('.yo-rc.json',config);
+          });
       });
     });
   });
 });
+
+

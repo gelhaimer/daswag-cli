@@ -16,6 +16,7 @@ export class Client extends GeneratorBase {
     packageManager: Client.FLAG_PACKAGE_MANAGER,
     provider: Client.FLAG_PROVIDER,
     skipChecks: Client.FLAG_SKIP_CHECKS,
+    skipGit: Client.FLAG_SKIP_GIT,
     useSass: Client.FLAG_USE_SASS,
   };
 
@@ -40,6 +41,7 @@ export class Client extends GeneratorBase {
       path: args.path,
       provider: options.provider,
       skipChecks: options.skipChecks,
+      skipGit: options.skipGit,
       useSass: options.useSass,
     });
   }

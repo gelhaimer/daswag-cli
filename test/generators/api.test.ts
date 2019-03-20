@@ -1,8 +1,8 @@
 import * as path from 'path';
 import * as assert from 'yeoman-assert';
 import * as helpers from 'yeoman-test';
-import {ApiPrompts} from '../../src/generators/api/prompts';
-import {Prompt} from '../../src/generators/prompt';
+import {ApiPrompts} from '../../src/generators/api/api-prompts';
+import {Prompt} from '../../src/generators/core/prompt';
 
 describe('daswag:api', () => {
   context('generate an API', () => {

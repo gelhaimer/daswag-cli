@@ -16,6 +16,7 @@ export class Api extends GeneratorBase {
     packageManager: Api.FLAG_PACKAGE_MANAGER,
     provider: Api.FLAG_PROVIDER,
     skipChecks: Api.FLAG_SKIP_CHECKS,
+    skipGit: Api.FLAG_SKIP_GIT,
     trace: Api.FLAG_TRACE,
   };
 
@@ -42,6 +43,7 @@ export class Api extends GeneratorBase {
       path: args.path,
       provider: options.provider,
       skipChecks: options.skipChecks,
+      skipGit: options.skipGit,
       trace: options.trace,
     });
   }

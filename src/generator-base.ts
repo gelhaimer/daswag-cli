@@ -1,4 +1,4 @@
-import * as flags from '@oclif/command/lib/flags';
+import {flags} from '@oclif/command';
 import {createEnv} from 'yeoman-environment';
 import CommandBase from './command-base';
 
@@ -20,6 +20,7 @@ export abstract class GeneratorBase extends CommandBase {
   public static FLAG_PROVIDER = flags.string({description: 'cloud provider used to deploy your project (aws)'});
   public static FLAG_SKIP_CHECKS = flags.boolean({description: 'skip tools and dependencies checks'});
   public static FLAG_TRACE = flags.string({description: 'Trace solution for your API (xray)'});
+  public static FLAG_SKIP_GIT = flags.boolean({description: 'skip git initialization'});
 
 
   protected init(): Promise<any> {

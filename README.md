@@ -3,7 +3,7 @@ daSWAG: Serverless Web Application Open CLI Framework
 
 Generate your full Serverless Web Application in seconds with daswag cli
 
-[![Join the community on Spectrum](https://withspectrum.github.io/badge/badge.svg)](https://spectrum.chat/daswag)
+[![Gitter](https://badges.gitter.im/daswag/community.svg)](https://gitter.im/daswag/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
 [![Version](https://img.shields.io/npm/v/daswag-cli.svg)](https://npmjs.org/package/daswag-cli)
 [![CircleCI](https://circleci.com/gh/daswag/daswag-cli/tree/master.svg?style=shield)](https://circleci.com/gh/daswag/daswag-cli/tree/master)
