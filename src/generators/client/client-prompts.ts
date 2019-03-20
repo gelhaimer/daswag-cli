@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import {Prompt} from '../prompt';
+import {Prompt} from '../core/prompt';
 
 export class ClientPrompts extends Prompt  {
 
