@@ -1,11 +1,12 @@
 import * as path from 'path';
 import * as assert from 'yeoman-assert';
 import * as helpers from 'yeoman-test';
+import {ClientFiles} from "../../src/generators/client/client-files";
 import {IClientOptions} from "../../src/generators/client/client-options.model";
 import {ClientPrompts} from '../../src/generators/client/client-prompts';
+import {Base} from "../../src/generators/core/base";
 import {Prompt} from '../../src/generators/core/prompt';
 import TestUtils from "../utils/test-utils";
-import {Base} from "../../src/generators/core/base";
 
 describe('daswag:client', () => {
   context('generate a client', () => {
@@ -29,8 +30,10 @@ describe('daswag:client', () => {
             generator = gen;
           })
           .then((dir) => {
+            const files = new ClientFiles(generator, config);
             assert.file( path.join(dir, '.yo-rc.json'));
             assert.jsonFileContent(path.join(dir, '.yo-rc.json'),{ "daswag-cli": config});
+            TestUtils.assertFiles(config, dir, 'client', files.files());
           });
       });
     });
@@ -55,14 +58,16 @@ describe('daswag:client', () => {
             generator = gen;
           })
           .then((dir) => {
-            console.log(generator);
+            const files = new ClientFiles(generator, config);
             assert.file( path.join(dir, '.yo-rc.json'));
-            assert.jsonFileContent(path.join(dir, '.yo-rc.json'), { "daswag-cli": config});
+            assert.jsonFileContent(path.join(dir, '.yo-rc.json'),{ "daswag-cli": config});
+            TestUtils.assertFiles(config, dir, 'client', files.files());
           });
       });
     });
 
     describe('with AWS, Angular and Serverless parameters', () => {
+      let generator: Base;
       const config : IClientOptions = {
         baseName: 'baseName',
         framework: ClientPrompts.FRAMEWORK_ANGULAR_VALUE,
@@ -72,13 +77,19 @@ describe('daswag:client', () => {
         useSass: true,
       };
       it('creates expected files for given configuration', () => {
-        helpers
+        return helpers
           .run(path.join(__dirname, '../../src/generators/client'))
           .withOptions({})
           .withPrompts(config)
+          .on('ready', function (gen) {
+            // This is called right before `generator.run()` is called
+            generator = gen;
+          })
           .then((dir) => {
-            assert.file( '.yo-rc.json');
-            assert.jsonFileContent('.yo-rc.json',config);
+            const files = new ClientFiles(generator, config);
+            assert.file( path.join(dir, '.yo-rc.json'));
+            assert.jsonFileContent(path.join(dir, '.yo-rc.json'),{ "daswag-cli": config});
+            TestUtils.assertFiles(config, dir, 'client', files.files());
           });
       });
     });

@@ -4,16 +4,16 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:4200',
+  apiUrl: 'YOUR-API-URL',
   auth: {
-    clientID: '6NyNZJsRV_ZPXLQKiQbRlFbJCvomIPPU',
-    domain: 'shipster-ippon.eu.auth0.com', // e.g., you.auth0.com
-    audience: 'https://shipster-ippon.eu.auth0.com/api/v2/',
+    clientID: 'AUTH0-CLIENT-ID',
+    domain: 'AUTH0-DOMAINE', // e.g., you.auth0.com
+    audience: 'AUTH0-AUDIENCE',
     scope: 'openid profile email',
-    callbackUrl: 'http://localhost:4200/pages/callback',
-    returnTo: 'http://localhost:4200'
+    callbackUrl: 'YOUR-CALLBACK-URL',
+    returnTo: 'YOUR-URL'
   },
-  rolesNamespaces: 'http://shipster-app.com/roles'
+  rolesNamespaces: 'AUTH0-ROLE-NAMESPACE'
 };
 
 /*
