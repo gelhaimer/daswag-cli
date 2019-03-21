@@ -1,4 +1,4 @@
-daSWAG: Serverless Web Application Open CLI Framework
+daSWAG: Serverless Web Application Generator CLI
 ==========
 
 Generate your full Serverless Web Application in seconds with daswag cli
