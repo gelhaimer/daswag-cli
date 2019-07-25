@@ -1,0 +1,323 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+    SAM Template used to create and deploy the application on AWS
+
+Parameters:
+  ProjectName:
+    Description: The name of the project
+    Type: String
+  StageName:
+    Description: The name of the stage, e.g. "dev", "preprod", "prod"
+    Default: dev
+    Type: String
+  S3BucketName:
+    Description: The name of the S3 bucket in which the Swagger specification is stored
+    Type: String
+  TableName:
+    Description: The name of the Table to created
+    Type: String
+
+Globals:
+    Function:
+        Runtime: python3.7
+
+Resources:
+  # User Data bucket
+  UserDataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectName}-${StageName}-userdata
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - "*"
+            AllowedMethods:
+              - GET
+              - PUT
+              - POST
+              - HEAD
+            AllowedOrigins:
+              - "*"
+            MaxAge: '3000'
+
+  # Authentication and Identity
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub ${ProjectName}-${StageName}
+      AutoVerifiedAttributes:
+        - "email"
+      UsernameAttributes:
+        - email
+      Schema:
+        - AttributeDataType: "String"
+          Name: email
+          Required: True
+
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub ${ProjectName}-${StageName}
+      GenerateSecret: false
+      UserPoolId: !Ref CognitoUserPool
+      WriteAttributes:
+        - "email"
+
+  CognitoIdPool:
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      CognitoIdentityProviders:
+        - ClientId: !Ref CognitoUserPoolClient
+          ProviderName: !GetAtt CognitoUserPool.ProviderName
+      AllowUnauthenticatedIdentities: true
+
+  CognitoUserGroup:
+    Type: "AWS::Cognito::UserPoolGroup"
+    Properties:
+      GroupName: "user"
+      Precedence: 1
+      RoleArn: !GetAtt CognitoIdentityPoolAuthUserRole.Arn
+      UserPoolId: !Ref CognitoUserPool
+
+  CognitoAdminGroup:
+    Type: "AWS::Cognito::UserPoolGroup"
+    Properties:
+      GroupName: "admin"
+      Precedence: 1
+      RoleArn: !GetAtt CognitoIdentityPoolAuthAdminRole.Arn
+      UserPoolId: !Ref CognitoUserPool
+
+  # Cognito Roles
+  # User role
+  CognitoIdentityPoolAuthUserRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${ProjectName}-${StageName}-user-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: cognito-identity.amazonaws.com
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              ForAnyValue:StringLike:
+                cognito-identity.amazonaws.com:amr: authenticated
+
+  # User policy
+  CognitoIdentityPoolAuthUserPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ${ProjectName}-${StageName}-user-policy
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action: execute-api:Invoke
+            Effect: Allow
+            Resource:
+              - Fn::Join:
+                  - ''
+                  - - 'arn:aws:execute-api:'
+                    - Ref: AWS::Region
+                    - ":"
+                    - Ref: AWS::AccountId
+                    - ":"
+                    - Ref: ApiGatewayRestApi
+                    - "/*/*/users/current"
+          - Action:
+              - s3:GetObject
+            Effect: Allow
+            Resource:
+              Fn::Join:
+                - ''
+                - - 'arn:aws:s3:::'
+                  - Ref: UserDataBucket
+                  - "/${cognito-identity.amazonaws.com:sub}/*"
+      Roles:
+        - Ref: CognitoIdentityPoolAuthUserRole
+
+  # Admin role
+  CognitoIdentityPoolAuthAdminRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${ProjectName}-${StageName}-admin-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: cognito-identity.amazonaws.com
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              ForAnyValue:StringLike:
+                cognito-identity.amazonaws.com:amr: authenticated
+
+  # Admin role policy
+  CognitoIdentityPoolAuthAdminPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub ${ProjectName}-${StageName}-admin-policy
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action: execute-api:Invoke
+            Effect: Allow
+            Resource:
+              - Fn::Join:
+                  - ''
+                  - - 'arn:aws:execute-api:'
+                    - Ref: AWS::Region
+                    - ":"
+                    - Ref: AWS::AccountId
+                    - ":"
+                    - Ref: ApiGatewayRestApi
+                    - "/*/*/*"
+          - Action:
+              - s3:*
+            Effect: Allow
+            Resource:
+              Fn::Join:
+                - ''
+                - - 'arn:aws:s3:::'
+                  - Ref: UserDataBucket
+                  - "/*"
+      Roles:
+        - Ref: CognitoIdentityPoolAuthAdminRole
+
+  # UnAuth role
+  CognitoIdentityPoolUnAuthRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${ProjectName}-${StageName}-unauth-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: cognito-identity.amazonaws.com
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              ForAnyValue:StringLike:
+                cognito-identity.amazonaws.com:amr: unauthenticated
+
+  # API Management
+  ApiGatewayRestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name:
+        Fn::Sub: ${ProjectName}-${StageName}
+      StageName: !Ref StageName
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location:
+              Fn::Join:
+                - ''
+                - - 's3://'
+                  - Ref: S3BucketName
+                  - '/specs.yml'
+
+  # Functions
+  # Get current logged user
+  GetCurrentUserFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        FunctionName: !Sub ${ProjectName}-${StageName}-GetCurrentUserFunction
+        CodeUri: ./
+        Handler: src/handlers.user_handler.get_current_user
+        Runtime: python3.7
+        Timeout: 3
+        AutoPublishAlias: live
+        MemorySize: 128
+        Tracing: Active
+        Environment:
+          Variables:
+            TABLE_NAME: !Ref Table
+        Events:
+          Get:
+            Type: Api
+            Properties:
+              RestApiId:
+                Ref: ApiGatewayRestApi
+              Path: /users/current
+              Method: GET
+
+  # Table
+  Table:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref TableName
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: "pk"
+          KeyType: HASH
+        - AttributeName: "sk"
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
+
+Outputs:
+    RestApi:
+      Description: "API Gateway endpoint URL"
+      Value:
+        Fn::Join:
+          - ""
+          - - "https://"
+            - Ref: ApiGatewayRestApi
+            - ".execute-api."
+            - Ref: "AWS::Region"
+            - ".amazonaws.com/"
+            - Ref: StageName
+    IdentityPool:
+      Description: Cognito Identity Pool
+      Value: !Ref CognitoIdPool
+    UserPool:
+      Description: Cognito User Pool
+      Value: !Ref CognitoUserPool
+    UserPoolClient:
+      Description: Cognito User Pool App
+      Value: !Ref CognitoUserPoolClient
+    UserDataBucket:
+      Value: !Ref UserDataBucket
+      Description: Name of the S3 bucket used to store application-specific user data
+    ApiGatewayRestApi:
+      Value: !Ref ApiGatewayRestApi
+      Description: Name of the ApiGatewayRestApi
+    CognitoIdentityPoolAuthStandardRole:
+      Value: !Ref CognitoIdentityPoolAuthUserRole
+      Description: Name of the Cognito Identity Pool authenticated user role
+    CognitoIdentityPoolAuthUserRoleArn:
+      Value:
+        Fn::GetAtt:
+          - CognitoIdentityPoolAuthUserRole
+          - Arn
+      Description: ARN of the Cognito Identity Pool authenticated user role
+    CognitoIdentityPoolAuthAdminRole:
+      Value: !Ref CognitoIdentityPoolAuthAdminRole
+      Description: Name of the Cognito Identity Pool authenticated user role
+    CognitoIdentityPoolAuthAdminRoleArn:
+      Value:
+        Fn::GetAtt:
+          - CognitoIdentityPoolAuthAdminRole
+          - Arn
+      Description: ARN of the Cognito Identity Pool authenticated user role
+    CognitoIdentityPoolUnAuthRole:
+      Value: !Ref CognitoIdentityPoolUnAuthRole
+      Description: Name of the Cognito Identity Pool unauthenticated user role
+    CognitoIdentityPoolUnAuthRoleArn:
+      Value:
+        Fn::GetAtt:
+          - CognitoIdentityPoolUnAuthRole
+          - Arn
+      Description: ARN of the Cognito Identity Pool unauthenticated user role
+    GetCurrentUserFunction:
+      Description: "Get current user Function ARN"
+      Value:
+        Fn::GetAtt:
+          - GetCurrentUserFunction
+          - Arn

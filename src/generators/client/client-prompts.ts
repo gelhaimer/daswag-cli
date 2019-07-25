@@ -18,15 +18,6 @@ export class ClientPrompts extends Prompt  {
     }]) : { framework: configValue };
   }
 
-  public askForPreprocessor(configValue: boolean | undefined) {
-    return configValue === undefined ? this.generator.prompt([{
-      default: true,
-      message: `Would you like to enable ${chalk.yellow('*SASS*')} stylesheet preprocessor?`,
-      name: 'useSass',
-      type: 'confirm',
-    }]) : { useSass: configValue };
-  }
-
   public askForPackageManager(configValue: string | undefined) {
     return configValue === undefined ? this.generator.prompt([ {
       choices: [

@@ -20,7 +20,7 @@ export default class CheckUtils {
       execSync('sam --version', {stdio: 'ignore'})
       check = true
     } catch {
-      this.logger.debug('Checking Serverless : KO');
+      this.logger.debug('Checking SAM : KO');
     }
     return check;
   }
@@ -64,7 +64,7 @@ export default class CheckUtils {
       execSync('yarn -v', {stdio: 'ignore'})
       check = true
     } catch {
-      this.logger.debug('Checking Git : KO');
+      this.logger.debug('Checking Npm : KO');
     }
     return check;
   }
@@ -75,7 +75,7 @@ export default class CheckUtils {
       execSync('yarn -v', {stdio: 'ignore'})
       check = true
     } catch {
-      this.logger.debug('Checking Git : KO');
+      this.logger.debug('Checking Yarn : KO');
     }
     return check;
   }

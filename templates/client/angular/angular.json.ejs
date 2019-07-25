@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "daswag-sample-app-web-auth0": {
+    "<%= baseName %>": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",
@@ -36,7 +36,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/daswag-sample-app-web-auth0",
+            "outputPath": "dist/<%= baseName %>",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -46,7 +46,7 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.scss",
+                "src/styles.scss",
             ],
             "stylePreprocessorOptions": {
               "includePaths": ["./node_modules"]
@@ -83,18 +83,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "daswag-sample-app-web-auth0:build"
+            "browserTarget": "<%= baseName %>:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "daswag-sample-app-web-auth0:build:production"
+              "browserTarget": "<%= baseName %>:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "daswag-sample-app-web-auth0:build"
+            "browserTarget": "<%= baseName %>:build"
           }
         },
         "test": {
@@ -105,7 +105,7 @@
             "tsConfig": "src/tsconfig.spec.json",
             "karmaConfig": "src/karma.conf.js",
             "styles": [
-              "src/styles.scss"
+                "src/styles.scss",
             ],
             "scripts": [
               "node_modules/jquery/dist/jquery.min.js",
@@ -133,7 +133,7 @@
         }
       }
     },
-    "daswag-sample-app-web-auth0-e2e": {
+    "<%= baseName %>-e2e": {
       "root": "e2e/",
       "projectType": "application",
       "prefix": "",
@@ -142,11 +142,11 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "daswag-sample-app-web-auth0:serve"
+            "devServerTarget": "<%= baseName %>:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "daswag-sample-app-web-auth0:serve:production"
+              "devServerTarget": "<%= baseName %>:serve:production"
             }
           }
         },
@@ -162,5 +162,5 @@
       }
     }
   },
-  "defaultProject": "daswag-sample-app-web-auth0"
+  "defaultProject": "<%= baseName %>"
 }

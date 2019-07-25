@@ -1,0 +1,8 @@
+requests
+boto3
+aws-xray-sdk
+pynamodb
+python-json-logger
+marshmallow
+marshmallow_enum
+marshmallow-pynamodb

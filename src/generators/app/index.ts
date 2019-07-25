@@ -1,3 +1,5 @@
+import {StringUtils} from "turbocommons-ts";
+import Utils from "../../utils/utils";
 import {Base} from '../core/base';
 import {IOptions} from "../core/options.model";
 import {AppPrompts} from './app-prompts';
@@ -42,7 +44,14 @@ class App extends Base {
     this.logger.debug('Prompting phase start');
     // Get default prompts
     const prompt = new AppPrompts(this);
-    const answerBaseName = await prompt.askForBaseName(this.opts.baseName) as any;
+    let answerBaseName = await prompt.askForBaseName(this.opts.baseName) as any;
+    if(answerBaseName && answerBaseName.baseName) {
+      answerBaseName = {
+        ...answerBaseName,
+        baseNameCamelCase: StringUtils.formatCase(answerBaseName.baseName, StringUtils.FORMAT_UPPER_CAMEL_CASE),
+        baseNameKebabCase: Utils.convertKebabCase(answerBaseName.baseName),
+      }
+    }
     const answerProvider = await prompt.askForCloudProviders(this.opts.provider) as any;
     const answerIac = await prompt.askForInfraAsCode(this.opts.iac, answerProvider.provider) as any;
     const answerAuth = await prompt.askForAuthentication(this.opts.auth, answerProvider.provider) as any;

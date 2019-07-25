@@ -17,7 +17,6 @@ export class Client extends GeneratorBase {
     provider: Client.FLAG_PROVIDER,
     skipChecks: Client.FLAG_SKIP_CHECKS,
     skipGit: Client.FLAG_SKIP_GIT,
-    useSass: Client.FLAG_USE_SASS,
   };
 
   public loggerName() {
@@ -42,7 +41,6 @@ export class Client extends GeneratorBase {
       provider: options.provider,
       skipChecks: options.skipChecks,
       skipGit: options.skipGit,
-      useSass: options.useSass,
     });
   }
 }

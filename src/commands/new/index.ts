@@ -26,7 +26,6 @@ export class New extends GeneratorBase {
     skipChecks: New.FLAG_SKIP_CHECKS,
     skipGit: New.FLAG_SKIP_GIT,
     trace: New.FLAG_TRACE,
-    useSass: New.FLAG_USE_SASS,
   };
 
   public loggerName() {
@@ -66,7 +65,6 @@ export class New extends GeneratorBase {
       skipChecks: options.skipChecks,
       skipGit: options.skipGit,
       trace: options.trace,
-      useSass: options.useSass,
     });
   }
 }

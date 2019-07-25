@@ -1,25 +1,18 @@
 import chalk from 'chalk';
+import { StringUtils } from 'turbocommons-ts';
 import CheckUtils from '../../utils/check-utils';
+import Utils from "../../utils/utils";
 import App = require('../app');
-import {Base} from '../core/base';
 import {ClientPrompts} from '../client/client-prompts';
+import {Base} from '../core/base';
+import {IApiOptions} from "./api-options.model";
 import {ApiPrompts} from './api-prompts';
 
 class Api extends Base {
 
   public static GENERATOR_TYPE = 'api';
 
-  private opts: {
-    auth?: string,
-    baseName?: string,
-    db?: string,
-    iac?: string,
-    language?: string,
-    monitoring?: string,
-    packageManager?: string,
-    provider?: string,
-    trace?: string
-  };
+  private opts: IApiOptions;
 
   private readonly type: string;
   private readonly skipChecks: boolean;
@@ -33,6 +26,8 @@ class Api extends Base {
     this.opts = {
       auth: options.auth,
       baseName: options.baseName,
+      baseNameApi: this.formatName(options.baseName),
+      baseNameApiKebabCase: Utils.convertKebabCase(this.formatName(options.baseName)),
       db: options.db,
       iac: options.iac,
       language: options.language,
@@ -41,6 +36,15 @@ class Api extends Base {
       provider: options.provider,
       trace: options.trace,
     };
+
+    if(this.opts.baseName) {
+      const name = this.opts.baseName + (this.opts.baseName.endsWith(('Api') ? '' : 'Api'));
+      this.opts = {
+        ...this.opts,
+        baseNameApi: name,
+        baseNameApiKebabCase: Utils.convertKebabCase(name),
+      }
+    }
     // Register transform
     this.registerPrettierTransform();
   }
@@ -53,6 +57,8 @@ class Api extends Base {
     this.logger.debug('Initializing phase start');
     // Override parameters from configuration file
     this.opts.baseName = this.config.get('baseName');
+    this.opts.baseNameApi = this.config.get('baseNameApi');
+    this.opts.baseNameApiKebabCase = this.config.get('baseNameApiKebabCase');
     this.opts.provider = this.config.get('provider');
     this.opts.iac = this.config.get('iac');
     this.opts.language = this.config.get('language');
@@ -68,7 +74,14 @@ class Api extends Base {
     const prompt = new ApiPrompts(this);
 
     // Get default options when APP generator otherwise prompt questions
-    const answerBaseName = await prompt.askForBaseName(this.opts.baseName) as any;
+    let answerBaseName = await prompt.askForBaseName(this.opts.baseName) as any;
+    if(answerBaseName && answerBaseName.baseName) {
+      answerBaseName = {
+        baseName: StringUtils.formatCase(answerBaseName.baseName, StringUtils.FORMAT_UPPER_CAMEL_CASE),
+        baseNameApi: this.formatName(answerBaseName.baseName),
+        baseNameApiKebabCase: Utils.convertKebabCase(this.formatName(answerBaseName.baseName)),
+      }
+    }
     const answerProvider = await prompt.askForCloudProviders(this.opts.provider) as any;
     const answerIac = await prompt.askForInfraAsCode(this.opts.iac, answerProvider.provider);
     const answerAuth = await prompt.askForAuthentication(this.opts.auth, answerProvider.provider);
@@ -126,6 +139,8 @@ class Api extends Base {
     this.logger.debug('Default phase start');
     // Save Configuration to yeoman file (.yo-rc.json)
     this.config.set('baseName', this.opts.baseName);
+    this.config.set('baseNameApi', this.opts.baseNameApi);
+    this.config.set('baseNameApiKebabCase', this.opts.baseNameApiKebabCase);
     this.config.set('provider', this.opts.provider);
     this.config.set('iac', this.opts.iac);
     this.config.set('auth', this.opts.auth);
@@ -179,6 +194,14 @@ class Api extends Base {
   public end() {
     this.logger.debug('Ending phase start');
     // this.log(chalk.green.bold('\nAPI generated successfully.\n'));
+  }
+
+  private formatName(baseName: string) {
+    if(baseName === 'undefined' || !baseName) {
+      return '';
+    }
+    const name = StringUtils.formatCase(baseName, StringUtils.FORMAT_UPPER_CAMEL_CASE);
+    return name + (name.endsWith('Api') ? '' : 'Api');
   }
 }
 

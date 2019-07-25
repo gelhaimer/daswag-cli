@@ -4,7 +4,7 @@ import {Base} from './base';
 export abstract class Prompt {
 
   public static PROVIDER_AWS_VALUE = 'aws';
-  public static IAC_SAM_VALUE = 'cfn';
+  public static IAC_SAM_VALUE = 'sam';
   public static IAC_TERRAFORM_VALUE = 'terraform';
   public static IAC_SERVERLESS_VALUE = 'sls';
   public static AUTH_AUTH0_VALUE = 'auth0';
@@ -46,12 +46,12 @@ export abstract class Prompt {
   public async askForInfraAsCode(configValue: string | undefined, provider: string) {
     return configValue === undefined ? this.generator.prompt([ {
       choices: [
-        {name: 'SAM (Serverless Application Model)', value: Prompt.IAC_SAM_VALUE},
+        {name: 'Cloudformation / SAM (Serverless Application Model)', value: Prompt.IAC_SAM_VALUE},
         // {name: 'Terraform', value: Prompt.IAC_TERRAFORM_VALUE},
         // {name: 'Serverless Framework', value: Prompt.IAC_SERVERLESS_VALUE}
       ],
       default: Prompt.IAC_SAM_VALUE,
-      message: 'On which cloud providers do you want to deploy your infrastructure?',
+      message: 'Which InfraAsCode do you want to use?',
       name: 'iac',
       type: 'list',
     }]) : { iac : configValue };

@@ -13,9 +13,6 @@ export default abstract class File {
     const startTime = new Date();
     const files = this.files();
 
-    // Initialize template path
-    this.generator.destinationRoot(path.join(this.generator.destinationRoot(), this.destinationName()));
-
     // Iterate over files
     for (let i = 0, blocks = Object.keys(files); i < blocks.length; i++) {
       for (let j = 0, blockTemplates = files[blocks[i]]; j < blockTemplates.length; j++) {
@@ -39,7 +36,5 @@ export default abstract class File {
   }
 
   public abstract files(): any;
-
-  public abstract destinationName(): string;
 
 }

@@ -1,0 +1,87 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  AWS Init Template used to create all needed resource for deployment of this project
+  This stack must follow the Least Privilege principle
+
+Parameters:
+  ProjectName:
+    Description: The name of the project
+    Type: String
+  StageName:
+    Description: The name of the stage, e.g. "dev", "preprod", "prod"
+    Default: dev
+    Type: String
+
+Resources:
+  DeployBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectName}-${StageName}-resources
+
+  StackDeployerUser:
+    Type: "AWS::IAM::User"
+    Properties:
+      UserName: !Sub ${ProjectName}-${StageName}-deploy
+      ManagedPolicyArns:
+        - !Ref StackDeployerPolicy
+      Path: /
+
+  StackDeployerKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref StackDeployerUser
+
+  StackDeployerPolicy:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      Path: "/"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Action:
+              - "cloudformation:*"
+              - "s3:*"
+              - "iam:*"
+              - "lambda:*"
+              - "dynamodb:*"
+              - "cognito-idp:*"
+              - "cognito-identity:*"
+              - "apigateway:*"
+            Resource:
+              - !Sub "arn:aws:s3:::${ProjectName}-${StageName}-resources/*"
+              - !Sub "arn:aws:s3:::${ProjectName}-${StageName}-userdata/*"
+              - !Sub "arn:aws:s3:::${ProjectName}-${StageName}-userdata"
+              - !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ProjectName}-${StageName}/*"
+              - !Sub "arn:aws:cloudformation:${AWS::Region}:aws:transform/Serverless-2016-10-31"
+              - !Sub "arn:aws:cloudformation:${AWS::Region}:aws:transform/Include"
+              - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ProjectName}-${StageName}-*"
+              - !Sub "arn:aws:iam::${AWS::AccountId}:role/${ProjectName}-*"
+              - !Sub "arn:aws:iam::${AWS::AccountId}:policy/${ProjectName}-*"
+              - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${ProjectName}-${StageName}-table"
+              - !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/*"
+              - !Sub "arn:aws:cognito-identity:${AWS::Region}:${AWS::AccountId}:identitypool/"
+              - !Sub "arn:aws:cognito-identity:${AWS::Region}:${AWS::AccountId}:identitypool/*"
+              - !Sub "arn:aws:apigateway:${AWS::Region}::/restapis"
+              - !Sub "arn:aws:apigateway:${AWS::Region}::/restapis/*"
+          -
+            Effect: "Allow"
+            Action:
+              - "cognito-idp:CreateUserPool"
+              - "s3:CreateBucket"
+            Resource: "*"
+
+Outputs:
+  DeployBucketName:
+    Description: Name of the bucket used to deploy resources
+    Value: !Ref DeployBucket
+  DeployerName:
+    Description: Name of user used to deploy resources
+    Value: !Ref StackDeployerUser
+  AccessKey:
+    Description: "AccessKey"
+    Value: !Ref StackDeployerKey
+  SecretAccessKey:
+    Description: "SecretAccessKey"
+    Value: !GetAtt StackDeployerKey.SecretAccessKey

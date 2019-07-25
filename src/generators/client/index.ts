@@ -1,10 +1,13 @@
 import chalk from 'chalk';
+import {StringUtils} from "turbocommons-ts";
 import CheckUtils from '../../utils/check-utils';
+import Utils from "../../utils/utils";
 import App = require('../app');
 import {Base} from '../core/base';
 import {ClientFiles} from "./client-files";
 import {IClientOptions} from "./client-options.model";
 import {ClientPrompts} from './client-prompts';
+import * as path from "path";
 
 class Client extends Base {
 
@@ -23,11 +26,12 @@ class Client extends Base {
     this.opts = {
       auth: options.auth,
       baseName: options.baseName,
+      baseNameClient: this.formatName(options.baseName),
+      baseNameClientKebabCase: Utils.convertKebabCase(this.formatName(options.baseName)),
       framework: options.framework,
       iac: options.iac,
       packageManager:options.packageManager,
       provider: options.provider,
-      useSass: options.useSass
     };
 
     // Register transform
@@ -42,11 +46,12 @@ class Client extends Base {
     this.logger.debug('Initializing phase start');
     // Load from configuration file
     this.opts.baseName = this.config.get('baseName');
+    this.opts.baseNameClient = this.config.get('baseNameClient');
+    this.opts.baseNameClientKebabCase = this.config.get('baseNameClientKebabCase');
     this.opts.provider = this.config.get('provider');
     this.opts.iac = this.config.get('iac');
     this.opts.auth = this.config.get('auth');
     this.opts.framework = this.config.get('framework');
-    this.opts.useSass = this.config.get('useSass');
     this.opts.packageManager = this.config.get('packageManager');
   }
 
@@ -54,13 +59,19 @@ class Client extends Base {
     this.logger.debug('Prompting phase start');
     // Get App prompts
     const prompt = new ClientPrompts(this);
-    const answerBaseName = await prompt.askForBaseName(this.opts.baseName) as any;
+    let answerBaseName = await prompt.askForBaseName(this.opts.baseName) as any;
+    if(answerBaseName && answerBaseName.baseName) {
+      answerBaseName = {
+        baseName: StringUtils.formatCase(answerBaseName.baseName, StringUtils.FORMAT_UPPER_CAMEL_CASE),
+        baseNameClient: this.formatName(answerBaseName.baseName),
+        baseNameClientKebabCase: Utils.convertKebabCase(this.formatName(answerBaseName.baseName)),
+      }
+    }
     const answerProvider = await prompt.askForCloudProviders(this.opts.provider) as any;
     const answerIac = await prompt.askForInfraAsCode(this.opts.iac, answerProvider.provider) as any;
     const answerAuth = await prompt.askForAuthentication(this.opts.auth, answerProvider.provider) as any;
 
     const answerFramework = await prompt.askForFramework(this.opts.framework) as any;
-    const answerUseSass = await prompt.askForPreprocessor(this.opts.useSass) as any;
     const answerPackageManager = await prompt.askForPackageManager(this.opts.packageManager) as any;
 
     // Combine answers
@@ -70,7 +81,6 @@ class Client extends Base {
       ...answerIac,
       ...answerAuth,
       ...answerFramework,
-      ...answerUseSass,
       ...answerPackageManager,
     };
   }
@@ -91,23 +101,25 @@ class Client extends Base {
         }
       }
       if (this.opts.packageManager === ClientPrompts.PACKAGE_MANAGER_NPM_VALUE) {
-        this.log(`${chalk.blueBright('\nChecking NPM: ')} ${CheckUtils.checkNpm() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
+        this.log(`${chalk.blueBright('Checking NPM: ')} ${CheckUtils.checkNpm() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
       } else if (this.opts.packageManager === ClientPrompts.PACKAGE_MANAGER_YARN_VALUE) {
-        this.log(`${chalk.blueBright('\nChecking Yarn: ')} ${CheckUtils.checkYarn() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
+        this.log(`${chalk.blueBright('Checking Yarn: ')} ${CheckUtils.checkYarn() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
       }
     }
   }
 
   public default() {
     this.logger.debug('Default phase start');
+    this.destinationRoot(path.join(this.destinationRoot(), '/' + this.opts.baseNameClientKebabCase));
     // Save Configuration to yeoman file (.yo-rc.json)
     this.config.set('type', this.type);
     this.config.set('baseName', this.opts.baseName);
+    this.config.set('baseNameClient', this.opts.baseNameClient);
+    this.config.set('baseNameClientKebabCase', this.opts.baseNameClientKebabCase);
     this.config.set('provider', this.opts.provider);
     this.config.set('iac', this.opts.iac);
     this.config.set('auth', this.opts.auth);
     this.config.set('framework', this.opts.framework);
-    this.config.set('useSass', this.opts.useSass);
     this.config.set('packageManager', this.opts.packageManager);
     this.config.save();
   }
@@ -143,6 +155,14 @@ class Client extends Base {
     // this.log(chalk.green.bold('\nClient application generated successfully.\n'));
     const logMsg = `Start your server with:\n ${chalk.blueBright.bold(`${this.opts.packageManager} start`)}\n`;
     this.log(chalk.green(logMsg));
+  }
+
+  private formatName(baseName: string) {
+    if(baseName === 'undefined' || !baseName) {
+      return '';
+    }
+    const name = StringUtils.formatCase(baseName, StringUtils.FORMAT_UPPER_CAMEL_CASE);
+    return name + (name.endsWith('Client') ? '' : 'Client');
   }
 }
 

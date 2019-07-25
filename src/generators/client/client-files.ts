@@ -1,4 +1,3 @@
-import Utils from "../../utils/utils";
 import {Base} from "../core/base";
 import File from '../core/file';
 import {IClientOptions} from './client-options.model';
@@ -16,10 +15,6 @@ export class ClientFiles extends File {
     return this.angularFiles();
   }
 
-  public destinationName(): string {
-    return Utils.convertKebabCase(this.options.baseName + '-client');
-  }
-
   private angularFiles() {
     return {
       assets: [
@@ -28,9 +23,9 @@ export class ClientFiles extends File {
           templates: [
             'src/assets/img/logo.svg',
             'src/assets/img/oval.svg',
+            'src/assets/.gitkeep',
             'src/assets/scss/global.scss',
             'src/assets/scss/vendor.scss',
-            'src/assets/.gitkeep',
           ]
         },
       ],
@@ -46,7 +41,7 @@ export class ClientFiles extends File {
         {
           path: ClientFiles.ANGULAR_PATH,
           templates: [
-            'angular.json',
+            'angular.json.ejs',
             'package.json',
             'README.md',
             'tsconfig.json',
@@ -64,8 +59,8 @@ export class ClientFiles extends File {
             'src/karma.conf.js',
             'src/main.ts',
             'src/polyfills.ts',
-            'src/styles.scss',
             'src/test.ts',
+            'src/styles.scss',
             'src/tsconfig.app.json',
             'src/tsconfig.spec.json',
             'src/tslint.json',
