@@ -127,10 +127,6 @@ class Api extends Base {
       }
       if (this.opts.language === ApiPrompts.LANGUAGE_PYTHON_VALUE) {
         this.log(`${chalk.blueBright('Checking Python & Pip: ')} ${CheckUtils.checkPython() && CheckUtils.checkPip() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
-      } else if (this.opts.language === ApiPrompts.LANGUAGE_NODEJS_VALUE && this.opts.packageManager === ApiPrompts.PACKAGE_MANAGER_NPM_VALUE) {
-        this.log(`${chalk.blueBright('Checking NPM: ')} ${CheckUtils.checkNpm() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
-      } else if (this.opts.language === ApiPrompts.LANGUAGE_NODEJS_VALUE && this.opts.packageManager === ApiPrompts.PACKAGE_MANAGER_YARN_VALUE) {
-        this.log(`${chalk.blueBright('Checking Yarn: ')} ${CheckUtils.checkYarn() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
       }
     }
   }
@@ -160,11 +156,10 @@ class Api extends Base {
     this.logger.debug('Installing phase start');
     let logMsg = '';
     try {
-      // Get executable
-      let executable: string | undefined;
       switch (this.opts.language) {
+        /*
         case ApiPrompts.LANGUAGE_NODEJS_VALUE:
-          executable = this.opts.packageManager;
+          const executable = this.opts.packageManager;
           logMsg = `To install your dependencies manually, run: ${chalk.blueBright.bold(`${this.opts.packageManager} install`)}`;
           // Configure install configuration
           const installConfig = {
@@ -175,6 +170,8 @@ class Api extends Base {
           // Launch install depending on configuration
           this.installDependencies(installConfig);
           break;
+
+         */
 
         case ApiPrompts.LANGUAGE_PYTHON_VALUE:
           logMsg = `To install your dependencies manually, run: ${chalk.blueBright.bold(`make install`)}`;

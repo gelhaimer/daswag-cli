@@ -22,7 +22,7 @@ describe('daswag:api', () => {
                          language: ApiPrompts.LANGUAGE_PYTHON_VALUE,
                          monitoring: ApiPrompts.MONITORING_CLOUDWATCH_VALUE,
                          provider: Prompt.PROVIDER_AWS_VALUE,
-                         trace: ApiPrompts.TRACE_DATADOG_VALUE,
+                         trace: ApiPrompts.TRACE_XRAY_VALUE,
                        })
           .on('end', done);
       });

@@ -5,7 +5,8 @@ import {IApiOptions} from './api-options.model';
 export class ApiFiles extends File {
 
   private static API_TEMPLATE_PATH = '../../../templates/api';
-  private static PYTHON37_PATH = 'python3.7/';
+  private static PYTHON37_PATH = 'python37/';
+  private static COMMON_PATH = './';
 
   constructor(generator: Base, options: IApiOptions) {
     super(generator, options, ApiFiles.API_TEMPLATE_PATH);
@@ -16,40 +17,49 @@ export class ApiFiles extends File {
   }
 
   private commonFiles() {
-
+    return [
+      {
+        path: ApiFiles.COMMON_PATH,
+        templates: [
+          'docs/config/config.properties',
+          'docs/files/.gitkeep',
+          'docs/images/.gitkeep',
+          'docs/index.adoc'
+        ]
+      },
+      {
+        path: ApiFiles.COMMON_PATH,
+        templates: [
+          'specs/specs.yml'
+        ]
+      },
+      {
+        path: ApiFiles.COMMON_PATH,
+        templates: [
+          'README.md',
+          'sonar-project.properties',
+          'template-init.yml',
+          'template.yml'
+        ]
+      },
+    ];
   }
 
   private python37Files() {
     return {
-      assets: [
-        {
-          path: ApiFiles.PYTHON37_PATH,
-          templates: [
-            'src/assets/img/logo.svg',
-            'src/assets/img/oval.svg',
-            'src/assets/.gitkeep',
-            'src/assets/scss/global.scss',
-            'src/assets/scss/vendor.scss',
-          ]
-        },
-      ],
-      common: [
-        {
-          templates: [
-            '.editorconfig',
-            '.gitignore',
-          ]
-        },
-      ],
+      common: this.commonFiles(),
       project: [
         {
           path: ApiFiles.PYTHON37_PATH,
           templates: [
-            'angular.json.ejs',
-            'package.json',
-            'README.md',
-            'tsconfig.json',
-            'tslint.json'
+            'dev-requirements.txt',
+            'test-requirements.txt',
+            'requirements.txt',
+            'Makefile',
+            'setup.cfg',
+            'setup.py',
+            'tox.ini',
+            'VERSION'
           ]
         },
       ],
@@ -57,130 +67,92 @@ export class ApiFiles extends File {
         {
           path: ApiFiles.PYTHON37_PATH,
           templates: [
-            'src/browserslist',
-            'src/favicon.ico',
-            'src/index.html',
-            'src/karma.conf.js',
-            'src/main.ts',
-            'src/polyfills.ts',
-            'src/test.ts',
-            'src/styles.scss',
-            'src/tsconfig.app.json',
-            'src/tsconfig.spec.json',
-            'src/tslint.json',
+            'src/__init__.py',
+            'src/main.py'
           ]
         },
         {
           path: ApiFiles.PYTHON37_PATH,
           templates: [
-            'src/environments/environment.prod.ts',
-            'src/environments/environment.ts',
+            'src/core/__init__.py',
+            'src/core/config.py',
+            'src/core/logger.py',
+            'src/core/response.py',
+            'src/core/decorator/__init__.py',
+            'src/core/decorator/api_endpoint.py',
+            'src/core/decorator/api_required.py',
+            'src/core/request/__init__.py',
+            'src/core/request/api_request.py',
+            'src/core/validator/__init__.py',
+            'src/core/validator/uuid_validator.py',
           ]
         },
         {
           path: ApiFiles.PYTHON37_PATH,
           templates: [
-            'src/app/app.component.html',
-            'src/app/app.component.ts',
-            'src/app/app.module.ts',
-            'src/app/app-routing.module.ts',
-          ]
-        },
-        {
-          path: ApiFiles.PYTHON37_PATH,
-          templates: [
-            'src/app/shared/index.ts',
-            'src/app/shared/shared.module.ts',
-            'src/app/shared/directives/index.ts',
-            'src/app/shared/directives/has-any-role.directive.ts',
-            'src/app/shared/directives/match-height.directive.ts',
-            'src/app/shared/directives/toggle-fullscreen.directive.ts',
-            'src/app/shared/footer/footer.component.ts',
-            'src/app/shared/footer/footer.component.html',
-            'src/app/shared/footer/footer.component.scss',
-            'src/app/shared/navbar/navbar.component.ts',
-            'src/app/shared/navbar/navbar.component.html',
-            'src/app/shared/navbar/navbar.component.scss',
-            'src/app/shared/footer/footer.component.ts',
-            'src/app/shared/footer/footer.component.html',
-            'src/app/shared/footer/footer.component.scss',
-            'src/app/shared/routes/content-layout.routes.ts',
-            'src/app/shared/routes/full-layout.routes.ts',
-          ]
-        },
-        {
-          path: ApiFiles.PYTHON37_PATH,
-          templates: [
+            'src/handlers/__init__.py',
+            'src/handlers/user_handler.py',
 
-            'src/app/pages/content-pages/content-pages.module.ts',
-            'src/app/pages/content-pages/content-pages-routing.module.ts',
-            'src/app/pages/content-pages/error/error-page.component.html',
-            'src/app/pages/content-pages/error/error-page.component.ts',
-            'src/app/pages/content-pages/error/error-page.component.scss',
-            'src/app/pages/content-pages/callback/callback.component.html',
-            'src/app/pages/content-pages/callback/callback.component.ts',
-            'src/app/pages/content-pages/callback/callback.component.scss',
-            'src/app/pages/full-pages/full-pages.module.ts',
-            'src/app/pages/full-pages/full-pages-routing.module.ts',
-            'src/app/pages/full-pages/home/home-page.component.html',
-            'src/app/pages/full-pages/home/home-page.component.ts',
-            'src/app/pages/full-pages/profile/profile-page.component.scss',
-            'src/app/pages/full-pages/profile/profile-page.component.html',
-            'src/app/pages/full-pages/profile/profile-page.component.ts',
           ]
         },
         {
           path: ApiFiles.PYTHON37_PATH,
           templates: [
-            'src/app/dashboard/dashboard.component.html',
-            'src/app/dashboard/dashboard.component.ts',
-            'src/app/dashboard/dashboard.module.ts',
-            'src/app/dashboard/dashboard-routing.module.ts',
+            'src/models/__init__.py',
+            'src/models/model.py',
+            'src/models/user_model.py',
           ]
         },
         {
           path: ApiFiles.PYTHON37_PATH,
           templates: [
-            'src/app/layouts/index.ts',
-            'src/app/layouts/content/content-layout.component.html',
-            'src/app/layouts/content/content-layout.component.ts',
-            'src/app/layouts/full/full-layout.component.html',
-            'src/app/layouts/full/full-layout.component.scss',
-            'src/app/layouts/full/full-layout.component.ts',
+            'src/schemas/__init__.py',
+            'src/schemas/user_schema.py',
           ]
         },
         {
           path: ApiFiles.PYTHON37_PATH,
           templates: [
-            'src/app/core/index.ts',
-            'src/app/core/core.module.ts',
-            'src/app/core/auth/auth.service.ts',
-            'src/app/core/auth/auth-guard.service.ts',
-            'src/app/core/auth/index.ts',
-            'src/app/core/auth/role-guard.service.ts',
-            'src/app/core/interceptors/auth.interceptor.ts',
-            'src/app/core/interceptors/auth-expired.interceptor.ts',
-            'src/app/core/interceptors/error-handler.interceptor.ts',
-            'src/app/core/interceptors/index.ts',
-            'src/app/core/models/index.ts',
-            'src/app/core/models/user.model.ts',
-            'src/app/core/services/index.ts',
-            'src/app/core/services/logger.service.ts',
-            'src/app/core/services/user.service.ts',
+            'src/services/__init__.py',
           ]
         },
       ],
-
-      teste2e: [
+      test: [
         {
           path: ApiFiles.PYTHON37_PATH,
           templates: [
-            'e2e/tsconfig.e2e.json',
-            'e2e/protractor.conf.js',
-            'e2e/src/app.e2e-spec.ts',
-            'e2e/src/app.po.ts',
+            'tests/__init__.py',
+            'tests/conftest.py',
           ]
-        }
+        },
+        {
+          path: ApiFiles.PYTHON37_PATH,
+          templates: [
+            'tests/unit/__init__.py',
+          ]
+        },
+        {
+          path: ApiFiles.PYTHON37_PATH,
+          templates: [
+            'tests/unit/core/__init__.py',
+            'tests/unit/core/test_logger.py',
+            'tests/unit/core/test_response.py',
+            'tests/unit/core/decorator/__init__.py',
+            'tests/unit/core/decorator/test_api_endpoint.py',
+            'tests/unit/core/decorator/test_api_required.py',
+            'tests/unit/core/request/__init__.py',
+            'tests/unit/core/request/test_api_request.py',
+            'tests/unit/core/validator/__init__.py',
+            'tests/unit/core/validator/test_validator.py',
+          ]
+        },
+        {
+          path: ApiFiles.PYTHON37_PATH,
+          templates: [
+            'tests/unit/handlers/__init__.py',
+            'tests/unit/handlers/test_user_handler',
+          ]
+        },
       ],
     };
   }
