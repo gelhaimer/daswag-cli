@@ -6,6 +6,7 @@ export class Api extends GeneratorBase {
   public static args = [];
 
   public static flags = {
+    applicationType: Api.FLAG_APPLICATION_TYPE,
     auth: Api.FLAG_AUTH,
     baseName: Api.FLAG_BASE_NAME,
     db: Api.FLAG_DB,
@@ -32,6 +33,7 @@ export class Api extends GeneratorBase {
 
     // Then launch the dedicated generator
     await super.generate('Api', {
+      applicationType: options.applicationType,
       auth: options.auth,
       baseName: options.baseName,
       db: options.db,

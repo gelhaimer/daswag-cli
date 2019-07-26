@@ -13,6 +13,7 @@ export class New extends GeneratorBase {
   ];
 
   public static flags = {
+    applicationType: New.FLAG_APPLICATION_TYPE,
     auth: New.FLAG_AUTH,
     baseName: New.FLAG_BASE_NAME,
     db: New.FLAG_DB,
@@ -51,6 +52,7 @@ export class New extends GeneratorBase {
 
     // Then launch the dedicated generator
     await super.generate(responses.type, {
+      applicationType: options.applicationType,
       auth: options.auth,
       baseName: options.baseName,
       db: options.db,

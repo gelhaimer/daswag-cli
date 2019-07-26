@@ -37,6 +37,7 @@ export class ApiFiles extends File {
         path: ApiFiles.COMMON_PATH,
         templates: [
           'README.md',
+          'Makefile',
           'sonar-project.properties',
           'template-init.yml',
           'template.yml'
@@ -55,7 +56,6 @@ export class ApiFiles extends File {
             'dev-requirements.txt',
             'test-requirements.txt',
             'requirements.txt',
-            'Makefile',
             'setup.cfg',
             'setup.py',
             'tox.ini',

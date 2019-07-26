@@ -7,6 +7,8 @@ import {ClientPrompts} from '../client/client-prompts';
 import {Base} from '../core/base';
 import {IApiOptions} from "./api-options.model";
 import {ApiPrompts} from './api-prompts';
+import {ClientFiles} from "../client/client-files";
+import {ApiFiles} from "./api-files";
 
 class Api extends Base {
 
@@ -24,15 +26,16 @@ class Api extends Base {
     this.skipChecks = options.skipChecks;
     this.skipGit = options.skipGit;
     this.opts = {
+      applicationType: options.applicationType,
       auth: options.auth,
       baseName: options.baseName,
       baseNameApi: this.formatName(options.baseName),
       baseNameApiKebabCase: Utils.convertKebabCase(this.formatName(options.baseName)),
+      cognitoIntegration: options.cognitoIntegration,
       db: options.db,
       iac: options.iac,
       language: options.language,
       monitoring: options.monitoring,
-      packageManager: options.packageManager,
       provider: options.provider,
       trace: options.trace,
     };
@@ -56,16 +59,21 @@ class Api extends Base {
   public async initializing() {
     this.logger.debug('Initializing phase start');
     // Override parameters from configuration file
+    // Common parts
+    this.opts.auth = this.config.get('auth');
     this.opts.baseName = this.config.get('baseName');
+    this.opts.cognitoIntegration = this.config.get('cognitoIntegration');
+    this.opts.iac = this.config.get('iac');
+    this.opts.provider = this.config.get('provider');
+
+    // API specific
+    this.opts.applicationType = this.config.get('applicationType');
     this.opts.baseNameApi = this.config.get('baseNameApi');
     this.opts.baseNameApiKebabCase = this.config.get('baseNameApiKebabCase');
-    this.opts.provider = this.config.get('provider');
-    this.opts.iac = this.config.get('iac');
     this.opts.language = this.config.get('language');
     this.opts.monitoring = this.config.get('monitoring');
     this.opts.trace = this.config.get('trace');
     this.opts.db = this.config.get('db');
-    this.opts.packageManager = this.config.get('packageManager');
   }
 
   public async prompting() {
@@ -83,29 +91,33 @@ class Api extends Base {
       }
     }
     const answerProvider = await prompt.askForCloudProviders(this.opts.provider) as any;
-    const answerIac = await prompt.askForInfraAsCode(this.opts.iac, answerProvider.provider);
-    const answerAuth = await prompt.askForAuthentication(this.opts.auth, answerProvider.provider);
+    const answerIac = await prompt.askForInfraAsCode(this.opts.iac, answerProvider.provider) as any;
+    const answerAuth = await prompt.askForAuth(this.opts.auth, answerProvider.provider) as any;
+    const answerCognitoIntegration = await prompt.askForCognitoIntegration(this.opts.cognitoIntegration, answerAuth.auth) as any;
+
+    // Prompt application type
+    const answerApplicationType = await prompt.askForApplicationType(this.opts.applicationType) as any;
 
     // Prompt language question
-    const answersLanguage = await prompt.askForLanguage(this.opts.language, answerProvider.provider);
-    const answerPackageManager = await prompt.askForPackageManager(this.opts.packageManager, answersLanguage.language);
+    const answerLanguage = await prompt.askForLanguage(this.opts.language, answerProvider.provider) as any;
 
     // Prompt other questions
-    const answerDb = await prompt.askForDB(this.opts.db, answerProvider.provider);
-    const answerMonitoring = await prompt.askForMonitoring(this.opts.monitoring, answerProvider.provider);
-    const answserTrace = await prompt.askForTrace(this.opts.trace, answerProvider.provider);
+    const answerDb = await prompt.askForDB(this.opts.db, answerProvider.provider) as any;
+    const answerMonitoring = await prompt.askForMonitoring(this.opts.monitoring, answerProvider.provider) as any;
+    const answerTrace = await prompt.askForTrace(this.opts.trace, answerProvider.provider) as any;
 
     // Combine answers to options
     this.opts = {
       ...answerProvider,
       ...answerBaseName,
+      ...answerApplicationType,
       ...answerIac,
       ...answerAuth,
-      ...answersLanguage,
-      ...answerPackageManager,
+      ...answerCognitoIntegration,
+      ...answerLanguage,
       ...answerDb,
       ...answerMonitoring,
-      ...answserTrace,
+      ...answerTrace,
     };
   }
 
@@ -140,7 +152,8 @@ class Api extends Base {
     this.config.set('provider', this.opts.provider);
     this.config.set('iac', this.opts.iac);
     this.config.set('auth', this.opts.auth);
-    this.config.set('packageManager', this.opts.packageManager);
+    this.config.set('applicationType', this.opts.applicationType);
+    this.config.set('cognitoIntegration', this.opts.cognitoIntegration);
     this.config.set('language', this.opts.language);
     this.config.set('monitoring', this.opts.monitoring);
     this.config.set('trace', this.opts.trace);
@@ -150,37 +163,16 @@ class Api extends Base {
 
   public writing() {
     this.logger.debug('Writing phase start');
+    // Copy files
+    new ApiFiles(this, this.opts).writeFiles();
   }
 
   public install() {
     this.logger.debug('Installing phase start');
     let logMsg = '';
     try {
-      switch (this.opts.language) {
-        /*
-        case ApiPrompts.LANGUAGE_NODEJS_VALUE:
-          const executable = this.opts.packageManager;
-          logMsg = `To install your dependencies manually, run: ${chalk.blueBright.bold(`${this.opts.packageManager} install`)}`;
-          // Configure install configuration
-          const installConfig = {
-            bower: false,
-            npm: this.opts.packageManager !== ClientPrompts.PACKAGE_MANAGER_YARN_VALUE,
-            yarn: this.opts.packageManager === ClientPrompts.PACKAGE_MANAGER_YARN_VALUE
-          };
-          // Launch install depending on configuration
-          this.installDependencies(installConfig);
-          break;
-
-         */
-
-        case ApiPrompts.LANGUAGE_PYTHON_VALUE:
-          logMsg = `To install your dependencies manually, run: ${chalk.blueBright.bold(`make install`)}`;
-          this.spawnCommandSync('make', ['install']);
-          break;
-
-        default:
-          this.logger.error('Choosen language does not have any referenced executable. You will have to install it manually.');
-      }
+      logMsg = `To bootstrap your application and install your dependencies, run: ${chalk.blueBright.bold(`make bootstrap`)}`;
+      this.spawnCommandSync('make', ['bootstrap']);
     } catch (e) {
       this.logger.error('Install of dependencies failed!');
       this.logger.error(e);
@@ -190,7 +182,9 @@ class Api extends Base {
 
   public end() {
     this.logger.debug('Ending phase start');
-    // this.log(chalk.green.bold('\nAPI generated successfully.\n'));
+    this.log(chalk.green.bold('\nAPI generated successfully.\n'));
+    const logMsg = `Build & Deploy your application with:\n ${chalk.blueBright.bold(`make release`)}\n`;
+    this.log(chalk.green(logMsg));
   }
 
   private formatName(baseName: string) {

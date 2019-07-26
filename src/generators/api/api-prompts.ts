@@ -3,41 +3,32 @@ import {Prompt} from '../core/prompt';
 
 export class ApiPrompts extends Prompt  {
 
-  public static LANGUAGE_PYTHON_VALUE = 'python';
-
+  public static TYPE_MONOLITH = 'monolith';
+  public static LANGUAGE_PYTHON_VALUE = 'python37';
   public static MONITORING_CLOUDWATCH_VALUE = 'cloudwatch';
-
   public static TRACE_XRAY_VALUE = 'xray';
-
   public static DB_DYNAMODB_VALUE = 'dynamodb';
 
-  public static PACKAGE_MANAGER_NPM_VALUE = 'npm';
-  public static PACKAGE_MANAGER_YARN_VALUE = 'yarn';
-
+  public async askForApplicationType(configValue: string | undefined) {
+    return configValue === undefined ? this.generator.prompt([{
+      choices: [{name: 'Monolithic application (recommended for simple projects)', value: ApiPrompts.TYPE_MONOLITH}],
+      default: ApiPrompts.TYPE_MONOLITH,
+      message: `Which ${chalk.yellow('*type*')} of application would you like to create?`,
+      name: 'applicationType',
+      type: 'list',
+    }]) : { applicationType : configValue };
+  }
 
   public askForLanguage(configValue: string | undefined, provider: string) {
     return configValue === undefined ? this.generator.prompt([{
       choices: [
         {name: 'Python 3.7', value:ApiPrompts.LANGUAGE_PYTHON_VALUE},
-        // {name: 'NodeJS', value:ApiPrompts.LANGUAGE_NODEJS_VALUE}
       ],
       default: ApiPrompts.LANGUAGE_PYTHON_VALUE,
       message: `Which ${chalk.yellow('*Language*')} would you like to use for your API?`,
       name: 'language',
       type: 'list',
     }]) : { language : configValue };
-  }
-
-  public askForPackageManager(configValue: string | undefined, language: string) {
-    return configValue === undefined ? this.generator.prompt([{
-      choices: [
-        {name: 'Yarn', value:ApiPrompts.PACKAGE_MANAGER_YARN_VALUE},
-        {name: 'Npm', value:ApiPrompts.PACKAGE_MANAGER_NPM_VALUE}],
-      default: ApiPrompts.PACKAGE_MANAGER_YARN_VALUE,
-      message: `Which ${chalk.yellow('*Package Manager*')} would you like to use for your API?`,
-      name: 'packageManager',
-      type: 'list',
-    }]) : { packageManager : configValue };
   }
 
   public askForMonitoring(configValue: string | undefined, provider: string) {

@@ -35,6 +35,7 @@ class App extends Base {
   public async initializing() {
     this.logger.debug('Initializing phase start');
     this.opts.baseName = this.config.get('baseName');
+    this.opts.cognitoIntegration = this.config.get('cognitoIntegration');
     this.opts.provider = this.config.get('provider');
     this.opts.iac = this.config.get('iac');
     this.opts.auth = this.config.get('auth');
@@ -54,11 +55,13 @@ class App extends Base {
     }
     const answerProvider = await prompt.askForCloudProviders(this.opts.provider) as any;
     const answerIac = await prompt.askForInfraAsCode(this.opts.iac, answerProvider.provider) as any;
-    const answerAuth = await prompt.askForAuthentication(this.opts.auth, answerProvider.provider) as any;
+    const answerAuth = await prompt.askForAuth(this.opts.auth, answerProvider.provider) as any;
+    const answerCognitoIntegration = await prompt.askForCognitoIntegration(this.opts.cognitoIntegration, answerAuth.auth)
 
     // Combine answers and current values
     this.opts = {
       ...answerBaseName,
+      ...answerCognitoIntegration,
       ...answerProvider,
       ...answerIac,
       ...answerAuth,
@@ -89,6 +92,7 @@ class App extends Base {
     this.logger.debug('Default phase start');
     // Save Configuration to yeoman file (.yo-rc.json)
     this.config.set('baseName', this.opts.baseName);
+    this.config.set('cognitoIntegration', this.opts.cognitoIntegration);
     this.config.set('provider', this.opts.provider);
     this.config.set('iac', this.opts.iac);
     this.config.set('auth', this.opts.auth);

@@ -1,8 +1,8 @@
 
 export interface IOptions {
-  [x: string]: any;
   auth?: string;
   baseName: string;
+  cognitoIntegration?: string;
   iac?: string;
   provider?: string;
 }

@@ -1,6 +1,5 @@
 import {flags} from '@oclif/command';
 
-import opn = require('opn');
 import CommandBase from '../command-base';
 import Utils from '../utils/utils';
 

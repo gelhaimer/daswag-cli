@@ -7,7 +7,8 @@ import pjson = require('pjson');
 
 export abstract class GeneratorBase extends CommandBase {
 
-  public static FLAG_AUTH = flags.string({description: 'Authentication used to secure your client and API (auth0)'});
+  public static FLAG_APPLICATION_TYPE = flags.string({description: 'Cognito integration used to secure your client and API (cup)'});
+  public static FLAG_AUTH = flags.string({description: 'Authentication & Authorization service used to secure your client and API (cognito)'});
   public static FLAG_BASE_NAME = flags.string({description: 'Base name of your project'});
   public static FLAG_DB = flags.string({description: 'Database used to store your objects (dynamodb)'});
   public static FLAG_FORCE = flags.boolean({description: 'overwrite existing files'});

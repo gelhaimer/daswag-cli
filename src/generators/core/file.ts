@@ -6,8 +6,7 @@ export default abstract class File {
 
   public static MAIN_SRC_DIR = 'src/';
 
-  constructor(public generator: Base, public options: IOptions, public templatePath: string) {
-  }
+  constructor(public generator: Base, public options: IOptions, public templatePath: string) {}
 
   public writeFiles() {
     const startTime = new Date();
