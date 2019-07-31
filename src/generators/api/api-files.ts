@@ -30,7 +30,7 @@ export class ApiFiles extends File {
       {
         path: ApiFiles.COMMON_PATH,
         templates: [
-          'specs/specs.yml'
+          'specs/specs.yaml'
         ]
       },
       {
@@ -39,8 +39,8 @@ export class ApiFiles extends File {
           'README.md',
           'Makefile',
           'sonar-project.properties',
-          'template-init.yml',
-          'template.yml'
+          'template-init.yaml',
+          'template.yaml'
         ]
       },
     ];
@@ -150,7 +150,7 @@ export class ApiFiles extends File {
           path: ApiFiles.PYTHON37_PATH,
           templates: [
             'tests/unit/handlers/__init__.py',
-            'tests/unit/handlers/test_user_handler',
+            'tests/unit/handlers/test_user_handler.py',
           ]
         },
       ],

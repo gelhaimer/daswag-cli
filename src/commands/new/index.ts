@@ -6,7 +6,7 @@ import App = require('../../generators/app');
 import Client = require('../../generators/client');
 
 export class New extends GeneratorBase {
-  public static description = ' Creates a new workspace and an initial daSWAG app.';
+  public static description = 'Creates a new workspace and an initial daSWAG app.';
 
   public static args = [
     {name: 'path', required: false, description: 'path to project, defaults to current directory'}

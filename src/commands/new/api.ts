@@ -1,7 +1,7 @@
 import {GeneratorBase} from '../../generator-base';
 
 export class Api extends GeneratorBase {
-  public static description = '';
+  public static description = 'Generate a new API based service';
 
   public static args = [];
 

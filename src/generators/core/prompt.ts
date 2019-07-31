@@ -8,8 +8,8 @@ export abstract class Prompt {
   public static IAC_TERRAFORM_VALUE = 'terraform';
   public static IAC_SERVERLESS_VALUE = 'sls';
   public static AUTH_COGNITO_VALUE = 'cognito';
-  public static COGNITO_CUP_ONLY = 'cup';
-  public static COGNITO_CIP_ONLY = 'cup';
+  // public static COGNITO_CUP_ONLY = 'cup';
+  // public static COGNITO_CIP_ONLY = 'cup';
   public static COGNITO_CUP_CIP = 'cup-cip';
 
   constructor(public generator: Base) {
@@ -38,7 +38,7 @@ export abstract class Prompt {
     return configValue === undefined ? this.generator.prompt([ {
       choices: [{name: 'Amazone Web Services', value: Prompt.PROVIDER_AWS_VALUE}],
       default: Prompt.PROVIDER_AWS_VALUE,
-      message: 'Which Cloud Providers do you want to use?',
+      message: `Which ${chalk.yellow('*Cloud Provider*')} do you want to use?`,
       name: 'provider',
       type: 'list',
     }]) : { provider : configValue };
@@ -52,7 +52,7 @@ export abstract class Prompt {
         // {name: 'Serverless Framework', value: Prompt.IAC_SERVERLESS_VALUE}
       ],
       default: Prompt.IAC_SAM_VALUE,
-      message: 'Which InfraAsCode technologie do you want to use?',
+      message: `Which ${chalk.yellow('*InfraAsCode*')} technology do you want to use?`,
       name: 'iac',
       type: 'list',
     }]) : { iac : configValue };
@@ -73,8 +73,8 @@ export abstract class Prompt {
   public async askForCognitoIntegration(configValue: string | undefined, provider: string) {
     return configValue === undefined ? this.generator.prompt([ {
       choices: [
-        {name: 'Use UserPool only (JWT)', value:Prompt.COGNITO_CUP_ONLY},
-        {name: 'Use an IdentityPool only (IAM Authorization)', value:Prompt.COGNITO_CIP_ONLY},
+        // {name: 'Use UserPool only (JWT)', value:Prompt.COGNITO_CUP_ONLY},
+        // {name: 'Use an IdentityPool only (IAM Authorization)', value:Prompt.COGNITO_CIP_ONLY},
         {name: 'Use an UserPool and an IdentityPool (IAM Authorization)', value:Prompt.COGNITO_CUP_CIP},
       ],
       default: Prompt.COGNITO_CUP_CIP,

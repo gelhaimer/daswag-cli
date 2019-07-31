@@ -4,7 +4,7 @@ import {Prompt} from '../core/prompt';
 export class ApiPrompts extends Prompt  {
 
   public static TYPE_MONOLITH = 'monolith';
-  public static LANGUAGE_PYTHON_VALUE = 'python37';
+  public static LANGUAGE_PYTHON37_VALUE = 'python37';
   public static MONITORING_CLOUDWATCH_VALUE = 'cloudwatch';
   public static TRACE_XRAY_VALUE = 'xray';
   public static DB_DYNAMODB_VALUE = 'dynamodb';
@@ -22,9 +22,9 @@ export class ApiPrompts extends Prompt  {
   public askForLanguage(configValue: string | undefined, provider: string) {
     return configValue === undefined ? this.generator.prompt([{
       choices: [
-        {name: 'Python 3.7', value:ApiPrompts.LANGUAGE_PYTHON_VALUE},
+        {name: 'Python 3.7', value:ApiPrompts.LANGUAGE_PYTHON37_VALUE},
       ],
-      default: ApiPrompts.LANGUAGE_PYTHON_VALUE,
+      default: ApiPrompts.LANGUAGE_PYTHON37_VALUE,
       message: `Which ${chalk.yellow('*Language*')} would you like to use for your API?`,
       name: 'language',
       type: 'list',

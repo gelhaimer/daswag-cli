@@ -5,10 +5,10 @@ import Utils from "../../utils/utils";
 import App = require('../app');
 import {ClientPrompts} from '../client/client-prompts';
 import {Base} from '../core/base';
+import {ApiFiles} from "./api-files";
 import {IApiOptions} from "./api-options.model";
 import {ApiPrompts} from './api-prompts';
-import {ClientFiles} from "../client/client-files";
-import {ApiFiles} from "./api-files";
+import * as path from "path";
 
 class Api extends Base {
 
@@ -39,17 +39,6 @@ class Api extends Base {
       provider: options.provider,
       trace: options.trace,
     };
-
-    if(this.opts.baseName) {
-      const name = this.opts.baseName + (this.opts.baseName.endsWith(('Api') ? '' : 'Api'));
-      this.opts = {
-        ...this.opts,
-        baseNameApi: name,
-        baseNameApiKebabCase: Utils.convertKebabCase(name),
-      }
-    }
-    // Register transform
-    this.registerPrettierTransform();
   }
 
   public loggerName(): string {
@@ -137,7 +126,7 @@ class Api extends Base {
           this.log(`${chalk.blueBright('Checking Serverless framework: ')} ${CheckUtils.checkServerless() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
         }
       }
-      if (this.opts.language === ApiPrompts.LANGUAGE_PYTHON_VALUE) {
+      if (this.opts.language === ApiPrompts.LANGUAGE_PYTHON37_VALUE) {
         this.log(`${chalk.blueBright('Checking Python & Pip: ')} ${CheckUtils.checkPython() && CheckUtils.checkPip() ? chalk.green.bold('OK') : chalk.red.bold('KO')}`);
       }
     }
@@ -145,6 +134,7 @@ class Api extends Base {
 
   public default() {
     this.logger.debug('Default phase start');
+    this.destinationRoot(path.join(this.destinationRoot(), '/' + this.opts.baseNameApiKebabCase));
     // Save Configuration to yeoman file (.yo-rc.json)
     this.config.set('baseName', this.opts.baseName);
     this.config.set('baseNameApi', this.opts.baseNameApi);
@@ -172,7 +162,7 @@ class Api extends Base {
     let logMsg = '';
     try {
       logMsg = `To bootstrap your application and install your dependencies, run: ${chalk.blueBright.bold(`make bootstrap`)}`;
-      this.spawnCommandSync('make', ['bootstrap']);
+      //this.spawnCommandSync('make', ['bootstrap']);
     } catch (e) {
       this.logger.error('Install of dependencies failed!');
       this.logger.error(e);

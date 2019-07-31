@@ -14,7 +14,6 @@ export DEBUG_LOG := 'true'
 .DEFAULT_GOAL := lint
 .PHONY: lint test upload clean bootstrap
 
-AWS_REGION ?= <%= regionName %>
 PROJECT_NAME ?= <%= baseName %>
 STAGE_NAME ?= dev
 
@@ -64,7 +63,7 @@ package:
 	sam package \
 		--s3-bucket ${SAM_BUCKET} \
 		--output-template-file packaged.yaml
-	aws s3 cp specs/specs.yml s3://${SAM_BUCKET}/specs.yml --region ${AWS_REGION}
+	aws s3 cp specs/specs.yaml s3://${SAM_BUCKET}/specs.yaml
 
 deploy-init:
 	aws cloudformation deploy \
@@ -72,8 +71,7 @@ deploy-init:
 		--stack-name $(PROJECT_NAME)-${STAGE_NAME}-init \
 		--parameter-overrides $(INIT_CFN_PARAMS) \
 		--capabilities CAPABILITY_NAMED_IAM \
-		--tags $(INIT_TAGS_PARAMS) \
-		--region $(AWS_REGION)
+		--tags $(INIT_TAGS_PARAMS)
 
 deploy:
 	sam deploy \
@@ -81,18 +79,15 @@ deploy:
 		--stack-name ${PROJECT_NAME}-${STAGE_NAME} \
 		--parameter-overrides $(CFN_PARAMS) \
 		--capabilities CAPABILITY_NAMED_IAM \
-		--tags $(TAGS_PARAMS) \
-		--region $(AWS_REGION)
+		--tags $(TAGS_PARAMS)
 
 delete-init:
 	aws cloudformation delete-stack \
-	--stack-name $(PROJECT_NAME)-${STAGE_NAME}-init \
-	--region ${AWS_REGION}
+	--stack-name $(PROJECT_NAME)-${STAGE_NAME}-init
 
 delete:
 	aws cloudformation delete-stack \
-	--stack-name $(PROJECT_NAME)-${STAGE_NAME} \
-	--region ${AWS_REGION}
+	--stack-name $(PROJECT_NAME)-${STAGE_NAME}
 
 release:
 	@make build

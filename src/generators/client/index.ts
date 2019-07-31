@@ -33,9 +33,6 @@ class Client extends Base {
       packageManager:options.packageManager,
       provider: options.provider,
     };
-
-    // Register transform
-    // this.registerPrettierTransform();
   }
 
   public loggerName(): string {
@@ -69,7 +66,8 @@ class Client extends Base {
     }
     const answerProvider = await prompt.askForCloudProviders(this.opts.provider) as any;
     const answerIac = await prompt.askForInfraAsCode(this.opts.iac, answerProvider.provider) as any;
-    const answerAuth = await prompt.askForAuthentication(this.opts.auth, answerProvider.provider) as any;
+    const answerAuth = await prompt.askForAuth(this.opts.auth, answerProvider.provider) as any;
+    const answerCognitoIntegration = await prompt.askForCognitoIntegration(this.opts.cognitoIntegration, answerAuth.auth) as any;
 
     const answerFramework = await prompt.askForFramework(this.opts.framework) as any;
     const answerPackageManager = await prompt.askForPackageManager(this.opts.packageManager) as any;
@@ -80,6 +78,7 @@ class Client extends Base {
       ...answerProvider,
       ...answerIac,
       ...answerAuth,
+      ...answerCognitoIntegration,
       ...answerFramework,
       ...answerPackageManager,
     };

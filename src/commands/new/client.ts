@@ -1,7 +1,7 @@
 import {GeneratorBase} from '../../generator-base';
 
 export class Client extends GeneratorBase {
-  public static description = '';
+  public static description = 'Generate a new client interface';
 
   public static args = [
     {name: 'path', required: false, description: 'path to project, defaults to current directory'}
