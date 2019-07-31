@@ -162,7 +162,7 @@ class Api extends Base {
     let logMsg = '';
     try {
       logMsg = `To bootstrap your application and install your dependencies, run: ${chalk.blueBright.bold(`make bootstrap`)}`;
-      //this.spawnCommandSync('make', ['bootstrap']);
+      this.spawnCommandSync('make', ['bootstrap']);
     } catch (e) {
       this.logger.error('Install of dependencies failed!');
       this.logger.error(e);
