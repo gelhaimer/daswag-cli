@@ -30,12 +30,12 @@ CFN_PARAMS := ProjectName=$(PROJECT_NAME) \
 		TableName=$(TABLE_NAME)
 
 INIT_TAGS_PARAMS := "daswag:project"="${PROJECT_NAME}-init" \
-		"prd:owner"="daswag" \
-		"prd:environment"=$(STAGE_NAME)
+		"daswag:owner"="daswag" \
+		"daswag:environment"=$(STAGE_NAME)
 
 TAGS_PARAMS := "daswag:project"="${PROJECT_NAME}" \
-		"prd:owner"="daswag" \
-		"prd:environment"=$(STAGE_NAME)
+		"daswag:owner"="daswag" \
+		"daswag:environment"=$(STAGE_NAME)
 
 lint:
 	sh -c '. .venv/bin/activate; flake8 --tee --output-file=pylint.out --exclude=src/python-libs src'
@@ -97,6 +97,11 @@ release:
 
 generate-doc:
 	docker run -v $$PWD:/var/task -it ruby:latest /bin/bash -c 'gem install asciidoctor && asciidoctor -b html5 -B docs -D target/ docs/index.adoc'
+
+output-init:
+	aws cloudformation describe-stacks \
+		--stack-name ${PROJECT_NAME}-${STAGE_NAME}-init \
+		--query 'Stacks[].Outputs'
 
 output:
 	aws cloudformation describe-stacks \
