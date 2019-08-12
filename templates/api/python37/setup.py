@@ -24,7 +24,7 @@ DEV_REQUIRED_EGGS = []
 TEST_REQUIRED_EGGS = []
 
 setup(
-    name='<%= baseName %>',
+    name='<%= baseNameApi %>',
     version=version,
     long_description=long_description,
     long_description_content_type='text/markdown',

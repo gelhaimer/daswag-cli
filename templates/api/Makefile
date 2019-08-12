@@ -14,7 +14,7 @@ export DEBUG_LOG := 'true'
 .DEFAULT_GOAL := lint
 .PHONY: lint test upload clean bootstrap
 
-PROJECT_NAME ?= <%= baseName %>
+PROJECT_NAME ?= <%= baseNameApiKebabCase %>
 STAGE_NAME ?= dev
 
 SAM_BUCKET = ${PROJECT_NAME}-${STAGE_NAME}-resources

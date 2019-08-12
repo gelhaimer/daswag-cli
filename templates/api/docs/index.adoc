@@ -1,4 +1,4 @@
-= serverless-python-sample
+= <%= baseNameApi %>
 :doctype: book
 :toc: left
 :toclevels: 3
@@ -26,7 +26,7 @@
 [NOTE]
 .This document is still in continuous development/modification
 ====
-If you find issues, please report to <%= baseName %> team.
+If you find issues, please report to <%= baseNameApi %> team.
 ====
 
 :toc!:

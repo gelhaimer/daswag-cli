@@ -8,8 +8,6 @@ export abstract class Prompt {
   public static IAC_TERRAFORM_VALUE = 'terraform';
   public static IAC_SERVERLESS_VALUE = 'sls';
   public static AUTH_COGNITO_VALUE = 'cognito';
-  // public static COGNITO_CUP_ONLY = 'cup';
-  // public static COGNITO_CIP_ONLY = 'cup';
   public static COGNITO_CUP_CIP = 'cup-cip';
 
   constructor(public generator: Base) {
@@ -36,7 +34,7 @@ export abstract class Prompt {
 
   public async askForCloudProviders(configValue: string | undefined) {
     return configValue === undefined ? this.generator.prompt([ {
-      choices: [{name: 'Amazone Web Services', value: Prompt.PROVIDER_AWS_VALUE}],
+      choices: [{name: 'Amazon Web Services', value: Prompt.PROVIDER_AWS_VALUE}],
       default: Prompt.PROVIDER_AWS_VALUE,
       message: `Which ${chalk.yellow('*Cloud Provider*')} do you want to use?`,
       name: 'provider',

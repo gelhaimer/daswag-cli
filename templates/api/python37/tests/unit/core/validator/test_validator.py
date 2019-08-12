@@ -1,7 +1,7 @@
 import unittest
 import uuid
 
-import src.core.validator.validator_uuid as validator
+import src.core.validator.uuid_validator as validator
 
 
 class TestValidator(unittest.TestCase):

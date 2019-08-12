@@ -1,7 +1,7 @@
 openapi: "3.0.1"
 info:
   version: 1.0.0
-  title: <%= baseName %>
+  title: <%= baseNameApi %>
   description: >
     ## Overview
 
@@ -11,8 +11,7 @@ info:
     All the API endpoints are HTTPS only and require authentication through dedicated identity provider.
 
 
-    The API is deployed to [AWS API
-    Gateway](https://aws.amazon.com/api-gateway/), with each endpoint mapped to
+    The API is deployed to [AWS APIGateway](https://aws.amazon.com/api-gateway/), with each endpoint mapped to
     a dedicated [AWS Lambda](https://aws.amazon.com/lambda/) function.
 
 
@@ -43,7 +42,7 @@ info:
     url: https://www.apache.org/licenses/LICENSE-2.0.html
 
 paths:
-  /users/current:
+  '/users/current':
     options:
       tags:
         - users
