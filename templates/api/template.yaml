@@ -216,7 +216,7 @@ Resources:
                 - ''
                 - - 's3://'
                   - Ref: S3BucketName
-                  - '/specs.yml'
+                  - '/specs.yaml'
 
   # Functions
   # Get current logged user
