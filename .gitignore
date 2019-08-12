@@ -20,3 +20,5 @@ Thumbs.db
 .idea/*
 *.iml
 *.log
+
+coverage
